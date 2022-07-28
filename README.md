@@ -48,14 +48,45 @@ Successful data deliverables migrate to a Dog Aging Project workspace on Terra.b
 
 ## Glossary
 
-**REDCap** - ???
+### Dog Aging Project Terms
 
-**Portal** - the user interface for a participant's dog on the Dog Aging Project website
+**REDCap** - system for managing Dog Aging Project database
+
+**Portal** - web user interface for a participant's dog
+
+**Sample Status** - a JSON containing sample status update sent via webook
+
+**Genomic Report** - a JSON containing genetic results sent via Webhook and returned to users via Portal
+
+**Webhook** - Dog Aging Project's webhook URL for receiving JSONs
 
 **Study ID** - unique identifier for a dog in REDCap
 
-**Swab ID** - unique identifier for a saliva sample aka barcode
+**Swab ID** - unique identifier for a sample, same as barcode on saliva swab
 
+### Sequencing Platform Terms
+
+**Client ID** - identifier for a sample as entered by sequencing platform, usually same as Swab ID (but mistakes happen)
+
+**Gencove ID** - unique identifier for a sequencing run as recorded on the Gencove platform
+
+**Batch ID** - unique identifier for a sequencing batch (e.g. platform and date of delivery)
+
+**Run ID** - unique identifier for a sequencing run as recorded by other sequencing platform(s) or as defined by Swab ID + Batch ID
+
+### Terra.bio Terms
+
+**Terra.bio** - a cloud-native platform for biomedical researchers to access data, run analysis tools, and collaborate
+
+**workspace** - a project sharing data, code, and results, and has its own associated Google Cloud bucket
+
+**data model** - nested tables in a Terra workspace that define and link root entities, which are the smallest unit of data that can be used as an input to workflows and store metadata about entities
+
+**Participant ID** - root entity for a dog (Study ID)
+
+**Sample ID** - root entity for a sample (Swab ID)
+
+**Platform ID** - root entity for a sequencing run (Gencove ID)
 
 ---
 
@@ -63,31 +94,85 @@ Successful data deliverables migrate to a Dog Aging Project workspace on Terra.b
 
 ### Data models
 
-The Terra data model tables uniquely identify and provide information on each entity of the genome sequencing process, from dog to saliva sample to sequencing run and resulting data.
+The Terra data model tables uniquely identify and provide information on each root entity of the genome sequencing process, from dog to saliva sample to sequencing run and resulting data.
 
-While many columns are set by outputs of workflows, many have been maintained manually (indicated in italics).
+While many columns are set by outputs of workflows, many have been maintained manually (*indicated in italics*).
 
 #### Dogs / Study IDs: `participant` table
 
 Columns:
 
 - `entity:participant_id`: dog's Study ID
-- `cohort`: _name of scientific cohort_
-- `cohort_code`: REDCap ID of scientific cohort
-- `report_flag_issue`: _logical, indicates if Genomic Report should not be pushed to dog's Portal_
-- `report_flag_pushed**`: _logical, indicates if Genomic Report JSON received on REDCap_
+- `cohort`: *name of scientific cohort*
+- `cohort_code`: identifier for scientific cohort in REDCap
+- `report_flag_issue`: *logical, indicates if Genomic Report should not be pushed to dog's Portal*
+- `report_flag_pushed**`: *logical, indicates if Genomic Report JSON received on REDCap*
 
 #### Samples / Swab IDs: `sample` table
 
 Columns:
 
 - `entity:sample_id`: dog's Swab ID
+- `bioproject`: *accession number for BioProject on the NCBI Sequence Read Archive*
+- `biosample`: *accession number for BioSample on the NCBI Sequence Read Archive*
+- `participant`: pairing to dog's Study ID
+- `sample_type`: indicates biological sample type (e.g. blood, saliva) but should always be saliva
+- `date_swab_arrival_laboratory`: date when sample delivered to sequencing platform as reported by USPS
+- `sample_note`: *any notes about sample*
 
 #### Runs / Platform IDs: `platform` table
 
 Columns:
 
 - `entity:platform_id`: unique ID for sequencing run
+- `participant`: pairing to dog's Study ID
+- `sample`: pairing to dog's Swab ID
+- `client`: *sample ID as entered by sequencing platform, even if it is wrong*
+- `biosample`: *accession number for BioSample on the NCBI Sequence Read Archive*
+- `bioproject`: *accession number for BioProject on the NCBI Sequence Read Archive, can be repeated for multiple runs*
+- `release`: *old field, whether data included in the Dog Aging Project 2021 Curated Data Release, even just as FASTQ files uploaded to SRA and not assigned to dog as final data*
+- `assigned_2021`: *logical, data assigned to dog in the Dog Aging Project 2021 Curated Data Release*
+- `assigned_2022`: *logical, data assigned to dog in the Dog Aging Project 2022 Curated Data Release*
+- `assigned_YYYY`: *logical, data assigned to dog in the Dog Aging Project YYYY Curated Data Release*
+- `assigned`: *logical, data currently assigned to dog*
+- `availability`: whether data deliverables available, archived, or restored for download on Gencove platform
+- `status`: whether data succeeded or failed imputation
+- `datetime`: date and time of data delivery
+- `effective_coverage`: *old field, reported effective coverage from Gencove platform used for prioritizing data in the case of multiple sequencing runs per sample*
+- `avg_aut_cov_bam`: average autosomal coverage inferred from BAM, used for prioritizing data in the case of multiple sequencing runs per sample
+- `sex_xratio_bam`: ratio of X chromosome coverage to autosomal coverage, used to infer sex
+- `fastqr1`: file (gs:// path), FASTQ file, raw sequencing read data, 1st read of paired-end run
+- `fastqr2`: file (gs:// path), FASTQ file, raw sequencing read data, 2nd read of paired-end run
+- `bam`: file (gs:// path), BAM file, aligned sequencing reads (assembly: CanFam3.1)
+- `bam_index`: file (gs:// path), BAI file, index of aligned sequencing reads (assembly: CanFam3.1)
+- `vcf`: file (gs:// path), bgzipped VCF file, raw imputed variant calls, sample ID is Swab ID
+- `vcf_index`: file (gs:// path), TBI file, index of raw imputed variant calls, sample ID is Swab ID
+- `vcf_filt`: file (gs:// path), bgzipped VCF file, genotype probability (default: max(GP)>0.7) filtered imputed variant calls, sample ID recoded to Study ID
+- `vcf_filt_index`: file (gs:// path), TBI file, index of genotype probability (default: max(GP)>0.7) filtered imputed variant calls, sample ID recoded to Study ID
+
+---
+
+## Workflows
+
+### `DAP_SequencingData_PlatformStatus`
+
+For the workspace (no entity), this workflow will add sequencing kit assignments to the data model, query for new sequencing data, update the data model tables, and communicate important sample events to the Dog Aging Project.
+
+### `DAP_SequencingData_PlatformIngestion`
+
+For a given sequencing run (entity: `platform`), this workflow will ingest new sequencing data, save raw sequencing data files to the workspace bucket, and update the data model tables with bucket links (outputs: `fastqr1`, `fastqr2`, `bam`, `bam_index`, `vcf`, `vcf_index`).
+
+### `DAP_SequencingData_Platform_FilterVCF`
+
+For a successful sequencing run (entity: `platform`), this workflow will filter the VCF by genotype probability and recode internal ID to the dog's Study ID (outputs: `vcf_filt` and `vcf_filt_index`).
+
+### `DAP_SequencingData_SexCheck`
+
+For a successful sequencing run (entity: `platform`), this workflow will assess the average autosomal coverage (output: `avg_aut_cov_bam`) and the ratio of X chromosome coverage to autosomal coverage to infer sex (output: `sex_xratio_bam`).
+
+### `DAP_SequencingData_MergeVCF`
+
+For a set of sequencing runs (entity: `platform_set`), this workflow will merge data across runs and output a PLINK2 set of all variants, a bgzipped VCF of all variants, and a PLINK1 set of biallelic SNPs.
 
 ---
 
