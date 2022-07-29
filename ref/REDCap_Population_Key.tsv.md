@@ -1,0 +1,1 @@
+`REDCap_Population_Key.tsv` is a tab-delimited file containing population IDs used in REDCap and population IDs used in ancestry reference. Some populations available in the ancestry reference panel do not have REDCap IDs associated with them and will not be reported in Genomic Reports.

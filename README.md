@@ -3,6 +3,16 @@
 ### dog-aging-project-dna-curation
 Curation of genome sequencing data for the Dog Aging Project
 
+#### Secrets
+
+The following secret variables are used in this repository:
+
+- `PLATFORM_PROJECT_API_KEY`: Gencove platform API key 
+- `PLATFORM_PROJECT_ID`: Gencove platform project ID
+- `DAP_WEBHOOK_URL`: webhook URL for Dog Aging Project
+- `SRA_ASPERA_DIR`: preload folder assigned by NCBI SRA
+- `SRA_ASPERA_KEY`: gs:// path for key file from NCBI SRA
+
 ---
 
 ## Project
