@@ -22,7 +22,7 @@ source /broad/software/scripts/useuse
 dir=${dir:-'/seq/vgb/dap/data/plink/bfiles/sets/'}
 input=${input:-'DogAgingProject_extras_001_gp-0.7_biallelic_snps-only_BreedReferenceSNPs_BreedReferenceMerge'}
 K=${K:-114}
-ref=${ref:-'/seq/vgb/dd/ancestry/reference/AncestryReferencePanel/AncestryReferencePanel_GlobalAncestry'}
+ref=${ref:-'gs://fc-6f3f8275-c9b4-4dcf-b2de-70f8d74f0874/ref/AncestryReferencePanel_GlobalAncestry'}
 cd ${dir}
 
 
