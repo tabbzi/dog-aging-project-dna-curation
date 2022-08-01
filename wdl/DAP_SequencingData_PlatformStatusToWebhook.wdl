@@ -19,7 +19,7 @@ workflow DAP_SequencingData_PlatformStatusToWebhook {
   String callback_docker_image = select_first([callback_docker_image_override, "tabbzi/terra-dogagingproject-genomic-reports-callback"])
   String? webhook_url_override
   String webhook_url = select_first([webhook_url_override, "${{ secrets.DAP_WEBHOOK_URL }}"])
-  File python_SampleStatusJSON
+  File python_SampleStatusJSON # bin/make_status_json.py
 
   call MakeJSON {
     input:

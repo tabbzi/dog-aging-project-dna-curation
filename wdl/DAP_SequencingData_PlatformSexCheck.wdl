@@ -17,8 +17,8 @@ workflow DAP_SequencingData_PlatformSexCheck {
   File? bam_index
   Boolean? indexed_override
   Boolean indexed = select_first([indexed_override,true])
-  File? bash_checksex
-  File? bash_autcov
+  File? bash_checksex # bin/sex_xratio_bam.sh
+  File? bash_autcov # bin/avg_aut_cov_bam.sh
   String? workflow_docker_image_override
   String workflow_docker_image = select_first([workflow_docker_image_override, "tabbzi/terra-dogagingproject-genomic-reports"])
   String? callback_docker_image_override

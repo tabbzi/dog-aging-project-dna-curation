@@ -7,7 +7,7 @@ Curation of genome sequencing data for the Dog Aging Project
 
 The following secret variables are used in this repository:
 
-- `PLATFORM_PROJECT_API_KEY`: Gencove platform API key 
+- `PLATFORM_PROJECT_API_KEY`: Gencove platform API key
 - `PLATFORM_PROJECT_ID`: Gencove platform project ID
 - `DAP_WEBHOOK_URL`: webhook URL for Dog Aging Project
 - `SRA_ASPERA_DIR`: preload folder assigned by NCBI SRA
@@ -102,7 +102,11 @@ Successful data deliverables migrate to a Dog Aging Project workspace on Terra.b
 
 ## Workspace
 
-### Data models
+### Workspace Data
+
+These are key-value pairs that can be used as inputs to workflows. For example, the key `SampleKitTable` is set to the gs:// path for the sample kit assignment table that gets updated every Sunday from REDCap.
+
+### Data Models
 
 The Terra data model tables uniquely identify and provide information on each root entity of the genome sequencing process, from dog to saliva sample to sequencing run and resulting data.
 

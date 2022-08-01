@@ -16,7 +16,7 @@ version 1.0
 workflow DAP_SequencingData_PlatformSRAUpload {
   input {
     File? aspera_keyfile_override
-    File aspera_keyfile = select_first([aspera_keyfile_override, ""${{ secrets.SRA_ASPERA_KEY }}"])
+    File aspera_keyfile = select_first([aspera_keyfile_override, "${{ secrets.SRA_ASPERA_KEY }}"])
     String? aspera_directory_override
     String aspera_directory = select_first([aspera_directory_override, "${{ secrets.SRA_ASPERA_DIR }}"])
     File input_fastqr1

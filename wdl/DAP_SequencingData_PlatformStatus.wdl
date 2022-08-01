@@ -20,7 +20,7 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 workflow DAP_SequencingData_PlatformStatus {
-  File? sample_kits_table
+  File? sample_kits_table # key: SampleKitTable
   String this_workspace_name
   String this_project_name
   String? workflow_docker_image_override
@@ -33,9 +33,9 @@ workflow DAP_SequencingData_PlatformStatus {
   String gencove_API_key = select_first([gencove_API_key_override, "${{ secrets.PLATFORM_PROJECT_API_KEY }}"])
   String? gencove_project_ID_override
   String gencove_project_ID = select_first([gencove_project_ID_override, "${{ secrets.PLATFORM_PROJECT_ID }}"])
-  File python_GetDataModel
-  File rscript_SetDataModel
-  File python_UpdateDataModel
+  File python_GetDataModel # bin/get_data_model.py
+  File rscript_SetDataModel # bin/set_data_model.R
+  File python_UpdateDataModel # bin/update_data_model.py
 
   call CurateProjectData {
     input:
