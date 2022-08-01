@@ -1,0 +1,11 @@
+CHR,POS,ref,ref_allele_effect,alt,alt_allele_effect,name,gene,possibleAlleles
+10,8356059,G,increase,T,decrease,"Chromosome #10 Position: 8356059","HMGA2","G & T"
+15,41219654,T,increase,C,decrease,"Chromosome #15 Position: 41219654","IGF1","T & C"
+18,20428564,G,increase,GC,decrease,"Chromosome #18 Position: 20428564","FGF4 retrogene","G & GC"
+32,5421641,A,decrease,T,increase,"Chromosome #32 Position: 5421641","non-coding","A & T"
+26,12761780,G,decrease,A,increase,"Chromosome #26 Position: 12761780","near MED13L","G & A"
+3,91085576,A,increase,G,decrease,"Chromosome #3 Position: 91085576","near LCORL","A & G"
+12,33792879,G,increase,A,decrease,"Chromosome #12 Position: 33792879","near OGFRL1","G & A"
+4,67040898,C,decrease,T,increase,"Chromosome #4 Position: 67040898","GHR","C & T"
+17,36295546,C,increase,T,decrease,"Chromosome #17 Position: 36295546","ANAPC1","C & T"
+6,22864474,A,increase,G,decrease,"Chromosome #6 Position: 22864474","HS3ST2","A & G"

@@ -1,0 +1,359 @@
+{
+    "id": "5156",
+    "inbreeding": 0.13673,
+    "data": [{
+            "breed": 114,
+            "percent": 0.115342
+        }, {
+            "breed": 4,
+            "percent": 0.0106423
+        }, {
+            "breed": 49,
+            "percent": 0.030839600000000002
+        }, {
+            "breed": 245,
+            "percent": 0.124323
+        }, {
+            "breed": 27,
+            "percent": 0.0177382
+        }, {
+            "breed": 76,
+            "percent": 0.0995763
+        }, {
+            "breed": 78,
+            "percent": 0.13673
+        }, {
+            "breed": 51,
+            "percent": 0.0555297
+        }, {
+            "breed": 61,
+            "percent": 0.0291079
+        }, {
+            "breed": 60,
+            "percent": 0.0521907
+        }, {
+            "breed": 115,
+            "percent": 0.0129806
+        }
+    ],
+    "panels": [{
+            "name": "Body Size",
+            "id": "body-size",
+            "top": {
+                "title": null,
+                "content": "",
+                "genericValues": null
+            },
+            "results": {
+                "title": null,
+                "content": "",
+                "traits": [{
+                        "name": "Chromosome #10 Position: 8356059",
+                        "gene": "HMGA2",
+                        "possibleAlleles": "G & T",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    }, {
+                        "name": "Chromosome #15 Position: 41219654",
+                        "gene": "IGF1",
+                        "possibleAlleles": "T & C",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": -1
+                    }, {
+                        "name": "Chromosome #18 Position: 20428564",
+                        "gene": "FGF4 retrogene",
+                        "possibleAlleles": "G & GC",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    }, {
+                        "name": "Chromosome #32 Position: 5421641",
+                        "gene": "non-coding",
+                        "possibleAlleles": "A & T",
+                        "firstCopy": "A",
+                        "secondCopy": "T",
+                        "effect": 0
+                    }, {
+                        "name": "Chromosome #26 Position: 12761780",
+                        "gene": "near MED13L",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": -1
+                    }, {
+                        "name": "Chromosome #3 Position: 91085576",
+                        "gene": "near LCORL",
+                        "possibleAlleles": "A & G",
+                        "firstCopy": "A",
+                        "secondCopy": "G",
+                        "effect": 0
+                    }, {
+                        "name": "Chromosome #12 Position: 33792879",
+                        "gene": "near OGFRL1",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    }, {
+                        "name": "Chromosome #4 Position: 67040898",
+                        "gene": "GHR",
+                        "possibleAlleles": "C & T",
+                        "firstCopy": "C",
+                        "secondCopy": "G",
+                        "effect": -1
+                    }, {
+                        "name": "Chromosome #17 Position: 36295546",
+                        "gene": "ANAPC1",
+                        "possibleAlleles": "C & T",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": 1
+                    }, {
+                        "name": "Chromosome #6 Position: 22864474",
+                        "gene": "HS3ST2",
+                        "possibleAlleles": "A & G",
+                        "firstCopy": "V",
+                        "secondCopy": "G",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        }, {
+            "name": "Colors",
+            "id": "coat-color",
+            "top": {
+                "title": null,
+                "content": "",
+                "genericValues": ["Brown", "#442825", "Red", "#7E341B"]
+            },
+            "results": {
+                "title": null,
+                "content": "",
+                "traits": [{
+                        "name": "Dominant Black",
+                        "gene": "CBD103",
+                        "possibleAlleles": "TCCC & T",
+                        "firstCopy": "TCCC",
+                        "secondCopy": "T",
+                        "effect": 0
+                    }, {
+                        "name": "Liver (Brown) - Variation Type 01",
+                        "gene": "TYRP1",
+                        "possibleAlleles": "T & A",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "effect": 0
+                    }, {
+                        "name": "Liver (Brown) - Variation Type 01",
+                        "gene": "TYRP1",
+                        "possibleAlleles": "C & T",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": 0
+                    }, {
+                        "name": "Liver (Brown) - Variation Type 01",
+                        "gene": "TYRP1",
+                        "possibleAlleles": "ACCT & A",
+                        "firstCopy": "ACCT",
+                        "secondCopy": "ACCT",
+                        "effect": 0
+                    }, {
+                        "name": "Dilute - Variation Type 01",
+                        "gene": "MLPH",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 0
+                    }, {
+                        "name": "Dilute - Variation Type 02",
+                        "gene": "MLPH",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": 0
+                    }, {
+                        "name": "Recessive Red",
+                        "gene": "MC1R",
+                        "possibleAlleles": "T & C",
+                        "firstCopy": "T",
+                        "secondCopy": "C",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        }, {
+            "name": "Coat Pattern",
+            "id": "coat-pattern",
+            "top": {
+                "title": null,
+                "content": "",
+                "genericValues": ["sable.png", "Sable", "masking.svg", "Masking"]
+            },
+            "results": {
+                "title": null,
+                "content": "",
+                "traits": [{
+                        "name": "Brindle (K Locus)",
+                        "gene": "Intergenic",
+                        "possibleAlleles": "C & A",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": 0
+                    }, {
+                        "name": "Tan Points (A Locus)",
+                        "gene": "ASIP",
+                        "possibleAlleles": "T & Insertion",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "effect": 0
+                    }, {
+                        "name": "Agouti (A Locus)",
+                        "gene": "ASIP",
+                        "possibleAlleles": "G & T",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "effect": 0
+                    }, {
+                        "name": "Agouti (A Locus)",
+                        "gene": "ASIP",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": 0
+                    }, {
+                        "name": "Mask (E Locus)",
+                        "gene": "MC1R",
+                        "possibleAlleles": "C & A",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": 0
+                    }, {
+                        "name": "Grizzle (E Locus)",
+                        "gene": "MC1R",
+                        "possibleAlleles": "C & A",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        }, {
+            "name": "White Spotting",
+            "id": "white-spotting",
+            "top": {
+                "title": null,
+                "content": "",
+                "genericValues": ["2", "Medium"]
+            },
+            "results": {
+                "title": null,
+                "content": "",
+                "traits": [{
+                        "name": "Chromosome #10 Position: 8356059",
+                        "gene": "CBD103",
+                        "possibleAlleles": "G & T",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    }, {
+                        "name": "Chromosome #15 Position: 41219654",
+                        "gene": "TYRP1",
+                        "possibleAlleles": "T & C",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": -1
+                    }, {
+                        "name": "Chromosome #18 Position: 20428564",
+                        "gene": "TYRP1",
+                        "possibleAlleles": "G & GC",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    }, {
+                        "name": "Chromosome #32 Position: 5421641",
+                        "gene": "TYRP1",
+                        "possibleAlleles": "A & T",
+                        "firstCopy": "A",
+                        "secondCopy": "T",
+                        "effect": 0
+                    }, {
+                        "name": "Chromosome #26 Position: 12761780",
+                        "gene": "MLPH",
+                        "possibleAlleles": "G & G",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": -1
+                    }, {
+                        "name": "Chromosome #3 Position: 91085576",
+                        "gene": "MLPH",
+                        "possibleAlleles": "A & G",
+                        "firstCopy": "A",
+                        "secondCopy": "G",
+                        "effect": 0
+                    }, {
+                        "name": "Chromosome #12 Position: 33792879",
+                        "gene": "MC1R",
+                        "possibleAlleles": "G & G",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    }, {
+                        "name": "Chromosome #4 Position: 67040898",
+                        "gene": "MC1R",
+                        "possibleAlleles": "C & G",
+                        "firstCopy": "C",
+                        "secondCopy": "G",
+                        "effect": -1
+                    }, {
+                        "name": "Chromosome #17 Position: 36295546",
+                        "gene": "MC1R",
+                        "possibleAlleles": "C & C",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": 1
+                    }, {
+                        "name": "Chromosome #6 Position: 22864474",
+                        "gene": "MC1R",
+                        "possibleAlleles": "A & G",
+                        "firstCopy": "C",
+                        "secondCopy": "G",
+                        "effect": 0
+                    }],
+                "genericValues": null
+            }
+        }, {
+            "name": "Coat Type",
+            "id": "coat-type",
+            "top": {
+                "title": null,
+                "content": "TBD",
+                "genericValues": null
+            },
+            "results": {
+                "title": null,
+                "content": "TBD",
+                "traits": null,
+                "genericValues": null
+            }
+        }, {
+            "name": "Special Features",
+            "id": "special-features",
+            "top": {
+                "title": null,
+                "content": "TBD",
+                "genericValues": null
+            },
+            "results": {
+                "title": null,
+                "content": "TBD",
+                "traits": null,
+                "genericValues": null
+            }
+        }
+    ]
+}
