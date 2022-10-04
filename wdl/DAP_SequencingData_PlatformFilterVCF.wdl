@@ -19,8 +19,7 @@ workflow DAP_SequencingData_PlatformFilterVCF {
   String input_participant
   String? workflow_docker_image_override
   String workflow_docker_image = select_first([workflow_docker_image_override, "tabbzi/terra-dogagingproject-genomic-reports"])
-  Float? genotype_probability_override
-  Float genotype_probability = select_first([genotype_probability_override,0.7])
+  Float genotype_probability = 0.7
 
   call FilterData {
     input:

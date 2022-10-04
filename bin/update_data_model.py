@@ -1,58 +1,192 @@
-#!/usr/bin/python
-
-import sys, argparse, os
+import argparse
 import firecloud.api as fapi
-import numpy as np
 import pandas as pd
 import json
-import datetime
+from io import StringIO
+import requests
 
-parser = argparse.ArgumentParser(description="This script will use Firecloud API to update the data models and generate JSONs for status updates.")
 
-parser.add_argument("-W",
-                    "--workspace",
-                    help="workspace",
-                    default="Dog Aging Project - Sequencing Data")
+def parse(args=None):
+    parser = argparse.ArgumentParser(description="This script will use Firecloud API to update the data models and generate JSONs for status updates.")
 
-parser.add_argument("-P",
-                    "--project",
-                    help="billing project or namespace",
-                    default="dap-user-return-reports-test")
+    parser.add_argument("-W",
+                        "--workspace",
+                        help="workspace",
+                        default="Dog Aging Project - Sequencing Data")
 
-parser.add_argument("-A",
-                    "--participant",
-                    help="participant data model table",
-                    default="participant.tsv")
+    parser.add_argument("-P",
+                        "--project",
+                        help="billing project or namespace",
+                        default="dap-user-return-reports-test")
 
-parser.add_argument("-B",
-                    "--sample",
-                    help="sample data model table",
-                    default="sample.tsv")
+    parser.add_argument("-S",
+                        "--status",
+                        help="status from gencove",
+                        default="statusTable.tsv")
 
-parser.add_argument("-C",
-                    "--platform",
-                    help="platform data model table",
-                    default="platform.tsv")
+    parser.add_argument("-K",
+                        "--kittable",
+                        help="kit table from terra",
+                        default="kitTable.tsv")
 
-args = parser.parse_args()
+    parser.add_argument("-H",
+                        "--webhook",
+                        help="webhook url",
+                        default="http://httpbin.org/post")
 
-# testing:
-# workspace="Dog Aging Project - Sequencing Data"
-# project="dap-user-return-reports-test"
-# test = fapi.get_entities(workspace = workspace, namespace = project, etype = 'platform').json()
+    return parser.parse_args(args)
 
-# Update data models:
-fapi.upload_entities_tsv(model = 'flexible', workspace = args.workspace, namespace = args.project, entities_tsv = args.participant)
-fapi.upload_entities_tsv(model = 'flexible', workspace = args.workspace, namespace = args.project, entities_tsv = args.sample)
-fapi.upload_entities_tsv(model = 'flexible', workspace = args.workspace, namespace = args.project, entities_tsv = args.platform)
+def get_entities(args):
+    """Get the platform and sample tables as dataframes."""
+    def get_table(etype: str):
+        result = pd.json_normalize(
+                fapi.get_entities(
+                    workspace=args.workspace,
+                    namespace=args.project,
+                    etype=etype).json()
+                )
+        result.columns = result.columns.str.replace("attributes.", "", regex=False)
+        return result.drop(columns = {'entityType'}).rename(
+                columns={"name": f"entity:{etype}_id"})
 
-# Read new runs from platform data model table:
-platform = pd.read_csv(args.platform, sep = '\t', dtype = {'entity:platform_id': str, 'sample': str, 'client': str, 'participant': str})
+    return get_table('platform'), get_table('sample')
 
-# For those with participant != "", generate JSONs
-platform = platform[platform['participant']!='']
 
-# make JSON for each NEW sample status
-for sample in platform['sample']:
-    print("Making JSON for " + sample)
-    platform[platform['sample']==sample][['sample','participant','entity:platform_id','datetime','status']].rename(columns = {'sample': 'sample_id', 'participant': 'study_id', 'entity:platform_id': 'gencove_id', 'datetime': 'date_time', 'status': 'sample_status'}).to_json(path_or_buf=str(sample) + ".JSON", orient='records')
+def get_status_table(status):
+    return pd.read_csv(
+            status,
+            sep='\t',
+            names=["datetime", "entity:platform_id", "client", "status", "availability"],
+            )
+
+
+def get_kit_table(kit):
+    return pd.read_csv(
+            kit,
+            sep='\t',
+            ).rename(columns={
+                'dog_id': 'participant',
+                'sample_id': 'entity:sample_id',
+                })
+
+
+def get_participants(kit, output):
+    result = kit[['participant', 'cohort']]
+    result = result.rename(columns={
+        'participant': 'entity:participant_id',
+        'cohort': 'cohort_code'})
+    result['int_ids'] = result['entity:participant_id'].astype('int')
+    result.sort_values(by='int_ids').drop_duplicates().to_csv(
+            output,
+            sep='\t',
+            na_rep='',
+            index=False,
+            columns=['entity:participant_id', 'cohort_code'],
+            )
+
+def get_sample_updates(kit, sample, output):
+    """Get samples in the kit not found in sample."""
+    kit[~kit['entity:sample_id'].isin(sample['entity:sample_id'])].to_csv(
+            output,
+            sep='\t',
+            na_rep='',
+            index=False,
+            columns=['entity:sample_id', 'participant',
+                     'date_swab_arrival_laboratory', 'sample_type'],
+            )
+
+
+def get_platform_updates(status, platform, kit, output):
+    # get status rows not found in platform
+    result = status[~status['entity:platform_id'].isin(platform['entity:platform_id'])]
+    # join with kit table, subset
+    result = result.merge(
+        kit[['entity:sample_id', 'participant']],
+        left_on='client',
+        right_on='entity:sample_id',
+    ).drop(
+        columns=['entity:sample_id'],
+    )
+    result['sample'] = result['client']
+    result.to_csv(
+        output,
+        sep='\t',
+        na_rep='',
+        index=False,
+        columns=[
+            'entity:platform_id',
+            'client',
+            'sample',
+            'participant',
+            'status',
+            'availability',
+            'datetime',
+        ]
+    )
+
+
+def upload_entities(args, table):  # table can be a file or stringio object
+    fapi.upload_entities_tsv(
+            model='flexible',
+            workspace=args.workspace,
+            namespace=args.project,
+            entities_tsv=table)
+
+
+def signal_webhook(args, platform):
+    # Read new runs from platform data model table:
+    to_send = pd.read_csv(
+        platform,
+        sep='\t',
+        dtype=str,
+    )
+
+    # For those with participant != "", generate JSONs
+    to_send = to_send[to_send['participant']!='']
+
+    # only these columns
+    to_send = to_send[['sample','participant','entity:platform_id','datetime','status']]
+
+    # change names
+    to_send = to_send.rename(columns={
+                                 'sample': 'sample_id',
+                                 'participant': 'study_id',
+                                 'entity:platform_id': 'gencove_id',
+                                 'datetime': 'date_time',
+                                 'status': 'sample_status',
+                             })
+
+    # send request
+    for _, sample in to_send.iterrows():
+        request = requests.post(args.webhook, json=sample.to_dict())
+        if request.status_code != 200:
+            print(f"Failed to post sample '{sample['sample_id']}'. "
+                  f"Response code {request.status_code}")
+        else:
+            print(f"Posted sample '{sample['sample_id']}'.")
+
+
+
+if __name__ == "__main__":
+    args = parse()
+    platform, sample = get_entities(args)
+    status = get_status_table(open(args.status))
+    kit = get_kit_table(open(args.kittable))
+
+    # update participants table
+    participants = StringIO()  # in memory file
+    get_participants(kit, participants)
+    upload_entities(args, participants)
+
+    # update sample table
+    samples = StringIO()  # in memory file
+    get_sample_updates(kit, sample, samples)
+    upload_entities(args, samples)
+
+    # update platform table
+    platform_updates = StringIO()  # in memory file
+    get_platform_updates(status, platform, kit, platform_updates)
+    upload_entities(args, platform_updates)
+
+    # signal webhook about sample status from platform
+    signal_webhook(args, platform_updates)
