@@ -177,16 +177,22 @@ if __name__ == "__main__":
     participants = StringIO()  # in memory file
     get_participants(kit, participants)
     upload_entities(args, participants)
+    with open('participant.tsv', 'w') as outfile:
+        outfile.write(participants.getvalue())
 
     # update sample table
     samples = StringIO()  # in memory file
     get_sample_updates(kit, sample, samples)
     upload_entities(args, samples)
+    with open('sample.tsv', 'w') as outfile:
+        outfile.write(samples.getvalue())
 
     # update platform table
     platform_updates = StringIO()  # in memory file
     get_platform_updates(status, platform, kit, platform_updates)
     upload_entities(args, platform_updates)
+    with open('platform.tsv', 'w') as outfile:
+        outfile.write(platform_updates.getvalue())
 
     # signal webhook about sample status from platform
     signal_webhook(args, platform_updates)

@@ -95,5 +95,8 @@ task CurateProjectData {
   }
 
   output {
+    File participant_table = "participant.tsv"
+    File sample_table = "sample.tsv"
+    File platform_table = "platform.tsv"
   }
 }
