@@ -1248,13 +1248,13 @@ def trait_coat_length(variantCalls,dogIndex,variantTable):
     predictPhenoIMG = ""
 
     for varIndex in variantTable.index[variantTable['module'] == thisModule].tolist():
-        if np.sum(variantCalls['genotypes_alleles'][varIndex,dogIndex,:] == variantTable.iloc[varIndex]['variantAllele']) >= 1:
+        if np.sum(variantCalls['genotypes_alleles'][varIndex,dogIndex,:] == variantTable.iloc[varIndex]['variantAllele']) == 2:
             predictPhenoID = "long_coat"
             predictPhenoSTR = "Long coat"
             predictPhenoHEX = ""
             predictPhenoVAL = ""
             predictPhenoIMG = "CoatType_Length_long.svg"
-        elif np.sum(variantCalls['genotypes_alleles'][varIndex,dogIndex,:] == variantTable.iloc[varIndex]['variantAllele']) == 0:
+        elif np.sum(variantCalls['genotypes_alleles'][varIndex,dogIndex,:] == variantTable.iloc[varIndex]['variantAllele']) =< 1:
             predictPhenoID = "short_coat"
             predictPhenoSTR = "Short coat"
             predictPhenoHEX = ""
