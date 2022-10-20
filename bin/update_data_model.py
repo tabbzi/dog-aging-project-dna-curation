@@ -53,17 +53,23 @@ def get_entities(args):
 
 
 def get_status_table(status):
-    return pd.read_csv(
+    result = pd.read_csv(
             status,
             sep='\t',
             names=["datetime", "entity:platform_id", "client", "status", "availability"],
+            dtype=str,
             )
+
+    result = result[~result["client"].str.contains('-')]
+
+    return result
 
 
 def get_kit_table(kit):
     return pd.read_csv(
             kit,
             sep='\t',
+            dtype=str,
             ).rename(columns={
                 'dog_id': 'participant',
                 'sample_id': 'entity:sample_id',
