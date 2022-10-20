@@ -200,5 +200,7 @@ if __name__ == "__main__":
     with open('platform.tsv', 'w') as outfile:
         outfile.write(platform_updates.getvalue())
 
+    # reset position in platform update after uploading
+    platform_updates.seek(0)
     # signal webhook about sample status from platform
     signal_webhook(args, platform_updates)
