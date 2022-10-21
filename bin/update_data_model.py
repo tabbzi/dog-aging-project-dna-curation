@@ -53,17 +53,23 @@ def get_entities(args):
 
 
 def get_status_table(status):
-    return pd.read_csv(
+    result = pd.read_csv(
             status,
             sep='\t',
             names=["datetime", "entity:platform_id", "client", "status", "availability"],
+            dtype=str,
             )
+
+    result = result[~result["client"].str.contains('-')]
+
+    return result
 
 
 def get_kit_table(kit):
     return pd.read_csv(
             kit,
             sep='\t',
+            dtype=str,
             ).rename(columns={
                 'dog_id': 'participant',
                 'sample_id': 'entity:sample_id',
@@ -126,6 +132,7 @@ def get_platform_updates(status, platform, kit, output):
 
 
 def upload_entities(args, table):  # table can be a file or stringio object
+    table.seek(o)
     fapi.upload_entities_tsv(
             model='flexible',
             workspace=args.workspace,
@@ -134,6 +141,8 @@ def upload_entities(args, table):  # table can be a file or stringio object
 
 
 def signal_webhook(args, platform):
+    # reset position in platform update
+    platform.seek(0)
     # Read new runs from platform data model table:
     to_send = pd.read_csv(
         platform,
@@ -176,23 +185,25 @@ if __name__ == "__main__":
     # update participants table
     participants = StringIO()  # in memory file
     get_participants(kit, participants)
-    upload_entities(args, participants)
     with open('participant.tsv', 'w') as outfile:
         outfile.write(participants.getvalue())
 
     # update sample table
     samples = StringIO()  # in memory file
     get_sample_updates(kit, sample, samples)
-    upload_entities(args, samples)
     with open('sample.tsv', 'w') as outfile:
         outfile.write(samples.getvalue())
 
     # update platform table
     platform_updates = StringIO()  # in memory file
     get_platform_updates(status, platform, kit, platform_updates)
-    upload_entities(args, platform_updates)
     with open('platform.tsv', 'w') as outfile:
         outfile.write(platform_updates.getvalue())
 
     # signal webhook about sample status from platform
     signal_webhook(args, platform_updates)
+
+    # upload changes to gcp
+    upload_entities(args, participants)
+    upload_entities(args, samples)
+    upload_entities(args, platform_updates)

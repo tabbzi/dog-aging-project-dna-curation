@@ -1,5 +1,6 @@
 import update_data_model
 from io import StringIO
+import numpy as np
 import pandas as pd
 
 
@@ -114,12 +115,13 @@ def test_get_status_table():
             '2022-07-09T19:30:03.465062+00:00\tplatform4\t31211050316980\tsucceeded\tavailable\n'
             '2022-07-09T19:30:01.321240+00:00\tplatform5\t31211050304746\tsucceeded\tavailable\n'
             '2022-07-09T19:30:00.120093+00:00\tplatform6\t31211050307026\tsucceeded\tavailable\n'
-            '2022-07-09T19:29:58.622768+00:00\tplatform7\t31211050316950\tsucceeded\tavailable\n'
+            # this format happens for some samples from gencove, should be removed
+            '2022-07-09T19:29:58.622768+00:00\tplatform7\tabc-31211050316950-def\tsucceeded\tavailable\n'
             )
     status = update_data_model.get_status_table(data)
 
     assert (status.columns == ["datetime", "entity:platform_id", "client", "status", "availability"]).all()
-    assert (status["entity:platform_id"] == [f"platform{i}" for i in range(1, 8)]).all()
+    assert (status["entity:platform_id"] == [f"platform{i}" for i in range(1, 7)]).all()
 
 
 def test_get_kit_table():
