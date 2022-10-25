@@ -1,23 +1,46 @@
+#!/bin/bash
 
+set -euo pipefail
 # Set variables
-gcpath=${gcpath:-'gs://fc-6f3f8275-c9b4-4dcf-b2de-70f8d74f0874/2d80b263-7d01-485f-851c-2e684b13c450/DAP_SequencingData_MergeVCF/0f8bc383-9c6e-4f05-8fc7-b5934636e7f3/call-MergeData/DogAgingProject_DogAgingProject_2022_Merge_13_gp-0.7.p*'}
-dir=${dir:-''} # this matters for ADMIXTURE which outputs to the working directory, which is annoying
-input=${input:-"DogAgingProject_DogAgingProject_2022_Merge_13_gp-0.7"}
-fasta=${fasta:-'gs://fc-6f3f8275-c9b4-4dcf-b2de-70f8d74f0874/ref/Canis_lupus_familiaris_assembly3.fasta'}
+# gcpath=${gcpath:-'gs://fc-6f3f8275-c9b4-4dcf-b2de-70f8d74f0874/2d80b263-7d01-485f-851c-2e684b13c450/DAP_SequencingData_MergeVCF/0f8bc383-9c6e-4f05-8fc7-b5934636e7f3/call-MergeData/DogAgingProject_DogAgingProject_2022_Merge_13_gp-0.7.p*'}
+dir=${dir:-'testing/'} # this matters for ADMIXTURE which outputs to the working directory, which is annoying
+input=${input:-"testing/DogAgingProject_2022-08-15_gp-0.7"}
+# fasta=${fasta:-'gs://fc-6f3f8275-c9b4-4dcf-b2de-70f8d74f0874/ref/Canis_lupus_familiaris_assembly3.fasta'}
+fasta=${fasta:-'testing/canis_assembly3.fasta'}
+imgdir="/home/tcomi/projects/dog-aging-project-dna-curation/images"
 
 # input: PLINK2 pfile set file prefix
 
 # Obtain merged data (PLINK2 file set)
-gsutil -m cp ${gcpath} .
+# gsutil -m cp ${gcpath} .
 
+# plink2/dev PLINK2 Alpha 3.6 final (14 Aug) https://www.cog-genomics.org/plink/2.0/
 # Generate PLINK1 file set of biallelic SNPs
-/seq/vgb/software/plink2/dev --dog --pfile ${input} --snps-only just-acgt --ref-from-fa --fa ${fasta} --max-alleles 2 --set-all-var-ids '@:#:$r:$a' --make-bed --out ${input}_biallelic-snps
+# plink2/dev --dog --pfile ${input} --snps-only just-acgt --ref-from-fa --fa ${fasta} --max-alleles 2 --set-all-var-ids '@:#:$r:$a' --make-bed --out ${input}_biallelic-snps
+singularity exec ${imgdir}/plink2_2.00a3.3--hb2a7ceb_0.sif \
+plink2 \
+  --dog \
+  --pfile ${input} \
+  --snps-only just-acgt \
+  --ref-from-fa \
+  --fa ${fasta} \
+  --max-alleles 2 \
+  --set-all-var-ids '@:#:$r:$a' \
+  --make-bed \
+  --out ${input}_biallelic-snps
 
 # Generate VCF of simple trait prediction variants
-/seq/vgb/software/plink2/dev --dog --pfile ${input} --extract bed0 VariantsOfInterest.bed --export vcf bgz --out ${input}_trait-predictions
+# plink/dev --dog --pfile ${input} --extract bed0 VariantsOfInterest.bed --export vcf bgz --out ${input}_trait-predictions
+singularity exec ${imgdir}/plink2_2.00a3.3--hb2a7ceb_0.sif \
+plink2 \
+  --dog \
+  --pfile ${input}  \
+  --extract bed0 /home/tcomi/projects/dog-aging-project-dna-curation/ref/VariantsOfInterest.bed \
+  --export vcf bgz \
+  --out ${input}_trait-predictions
 
 # Submit PLINK1 bfile set for global ancestry inference using ADMIXTURE
-qsub -v dir=${dir},input=${input}'_biallelic-snps' /seq/vgb/dap/bin/GlobalAncestry_ADM.sh
+# qsub -v dir=${dir},input=${input}'_biallelic-snps' /seq/vgb/dap/bin/GlobalAncestry_ADM.sh
 
 # Parse ADMIXURE outputs
 python3 /seq/vgb/dap/bin/parseGlobalAncestryADM.py -S <(awk '{print $2}' ${input}'_biallelic-snps.fam') -Q ${input}'_biallelic-snps_GlobalAncestrySNPs_RefMerge.114.Q.labeled'
