@@ -132,7 +132,7 @@ def get_platform_updates(status, platform, kit, output):
 
 
 def upload_entities(args, table):  # table can be a file or stringio object
-    table.seek(o)
+    table.seek(0)
     fapi.upload_entities_tsv(
             model='flexible',
             workspace=args.workspace,
