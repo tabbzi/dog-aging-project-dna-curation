@@ -45,6 +45,10 @@ def sample_caller(default_args):
 
 def test_caller_initialization(sample_caller):
     assert sample_caller.mask.shape == (44, 151)
+    # handle ./. properly; gt == NA
+    assert (sample_caller.gts.iloc[-1, :] == (['NA', 'NA'] + ['G']*8)).all()
+    # not a variant count
+    assert (sample_caller.variant_counts.iloc[-1, :] == 0).all()
 
 def assert_result_equals(results, traits):
     for (dog, result), trait in zip(results.iterrows(), traits):
@@ -209,7 +213,10 @@ def test_trait_red(sample_caller):
                  [0, 1, 2],
              )),
     )
-    sample_caller.variant_counts = pd.DataFrame(0, index=range(44), columns=(str(r) for r in range(len(modules))))
+    sample_caller.variant_counts = pd.DataFrame(
+        0,
+        index=range(44),
+        columns=pd.Index((str(r) for r in range(len(modules))), name='sample'))
     sample_caller.variant_counts.loc[sample_caller.variants['module'] == 'mod_red_intensity', :] = modules.to_numpy().T
     result = sample_caller.trait_red()
     expected = [g2p.TRAITS['cream']] * len(result)
@@ -696,7 +703,8 @@ def test_main(default_args, old_outputs):
         new_values = sorted(line.rstrip('\n') for line in open(f'{default_args.output}_{file}').readlines())
         old_values = sorted(value.getvalue().split('\n'))
         # for new, old in zip(new_values, old_values):
-        #     if new != old:
-        #         print(new)
-        #         print(old)
+        #     if old not in new_values:
+        #         print(old, 'old missing')
+        #     if new not in old_values:
+        #         print(new, 'new missing')
         assert new_values == old_values, f"failed on {default_args.output}_{file}"

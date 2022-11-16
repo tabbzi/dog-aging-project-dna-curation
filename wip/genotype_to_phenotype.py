@@ -186,6 +186,11 @@ class TraitCaller():
                 self.vcf['variants/REF'][self.mask[i, :]][:, None, None],
                 self.vcf['variants/ALT'][self.mask[i, :]][:, 0][:, None, None],
             )
+            gts = np.where(
+                self.vcf['calldata/GT'][self.mask[i, :]] == -1,  # ./.
+                'NA',
+                gts
+            )
             matches = np.sum(gts == self.variants.loc[i, 'variantAllele'], axis=2)
             # taking the max uses the site with the most variant alleles
             self.variant_counts.loc[i, :] = np.amax(matches, axis=0)
@@ -251,16 +256,19 @@ class TraitCaller():
         )
 
         # convert to long form for indexing into coefficients
-        red_variants = pd.wide_to_long(red_variants, '', 'variant', 'dog')
+        red_variants = pd.melt(red_variants, id_vars=['variant'])
         # replace nans with 0
-        red_variants[red_variants.isna()] = 0
-        red_variants = red_variants.astype(int)
+        red_variants.loc[red_variants.value.isna(), 'value'] = 0
+        red_variants = red_variants.astype({'value': int})
 
         # this looks up the coefficient value for each dog/variant
-        idx, cols = pd.factorize(red_variants.index.get_level_values('variant'))
-        red_variants['coeff'] = red_intensity_coefficients.to_numpy()[idx, red_variants['']]
+        red_variants['coeff'] = red_intensity_coefficients.to_numpy()[
+            red_intensity_coefficients.index.get_indexer(red_variants['variant']),
+            red_variants['value'],
+        ]
 
-        intensity = red_variants['coeff'].groupby('dog').sum() - 1.504
+        intensity = red_variants.groupby(by='sample')['coeff'].sum() - 1.504
+        intensity = intensity.reindex(self.variant_counts.columns.values)
 
         # convert to trait, this is the opposite order of the if/else statements
         color = np.where(intensity < 0.75, 'tan', 'red')
