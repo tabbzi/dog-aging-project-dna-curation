@@ -49,9 +49,11 @@ imgdir="/home/tcomi/projects/dog-aging-project-dna-curation/images"
 # Run simple traits:
 # qsub /seq/vgb/dap/bin/runTraitPredictions.sh ${input}'_trait-predictions'
 /tigress/tcomi/.conda/dap/bin/python genotype_to_phenotype.py \
-  -F ${input}_trait-predictions.vcf.gz \
-  -O testing/trait/DogAgingProject_2022-08-15_gp-0.7_trait-predictions \
-  -V /home/tcomi/projects/dog-aging-project-dna-curation/ref/DogAgingProject_VariantsOfInterest.csv
+  --vcf ${input}_trait-predictions.vcf.gz \
+  --output testing/trait/DogAgingProject_2022-08-15_gp-0.7_trait-predictions \
+  --variants /home/tcomi/projects/dog-aging-project-dna-curation/ref/DogAgingProject_VariantsOfInterest.csv \
+  --reference CanFam3.1 \
+  --imputation impute-v2
 
 exit 0
 

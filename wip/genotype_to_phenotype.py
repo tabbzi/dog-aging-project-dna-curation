@@ -14,7 +14,35 @@ import re
 from dataclasses import dataclass
 import itertools
 
-arrLen = np.vectorize(len)
+
+def parse_args(args=None):
+    parser = argparse.ArgumentParser(description="This script extracts and interprets genotype calls from a canine VCF into phenotype predictions for well-studied physical traits.")
+
+    parser.add_argument("-F", "--vcf",
+                        help="input variant call file",
+                        default="input.vcf.gz")
+    parser.add_argument("-V", "--variants",
+                        help="input variants of interest, comma-delimited file",
+                        default="bin/DogAgingProject_VariantsOfInterest.csv")
+    parser.add_argument("-I", "--imputation",
+                        help="If imputed, then imputation panel version? OPTS: impute-v1, impute-v2",
+                        default="impute-v2")
+    parser.add_argument("-R", "--reference",
+                        help="Which reference genome? OPTS: CanFam3.1, UU_Cfam_GSD_1.0, Dog10K_Boxer_Tasha",
+                        default="CanFam3.1")
+    parser.add_argument("-O", "--output",
+                        help="output filepath and prefix",
+                        default="output")
+
+    args = parser.parse_args(args)
+
+    print(f"Variant call file (VCF): {args.vcf}")
+    print(f"Variants of interest: {args.variants}")
+    print(f"Asserting that imputation panel is {args.imputation}")
+    print(f"Asserting that reference panel is {args.reference}")
+
+    return args
+
 
 @dataclass
 class Trait():
@@ -550,35 +578,6 @@ class TraitCaller():
         # merge the 3 tables
         result = result.join(gts.merge(probs, on=['variant_index', 'sample']))
         return result['sample,CHR,POS,tab,trait,locus,variant,A1,A2,CONF'.split(',')]
-
-
-def parse_args(args=None):
-    parser = argparse.ArgumentParser(description="This script extracts and interprets genotype calls from a canine VCF into phenotype predictions for well-studied physical traits.")
-
-    parser.add_argument("-F", "--vcf",
-                        help="input variant call file",
-                        default="input.vcf.gz")
-    parser.add_argument("-V", "--variants",
-                        help="input variants of interest, comma-delimited file",
-                        default="bin/DogAgingProject_VariantsOfInterest.csv")
-    parser.add_argument("-I", "--imputation",
-                        help="If imputed, then imputation panel version? OPTS: impute-v1, impute-v2",
-                        default="impute-v2")
-    parser.add_argument("-R", "--reference",
-                        help="Which reference genome? OPTS: CanFam3.1, UU_Cfam_GSD_1.0, Dog10K_Boxer_Tasha",
-                        default="CanFam3.1")
-    parser.add_argument("-O", "--output",
-                        help="output filepath and prefix",
-                        default="output")
-
-    args = parser.parse_args(args)
-
-    print(f"Variant call file (VCF): {args.vcf}")
-    print(f"Variants of interest: {args.variants}")
-    print(f"Asserting that imputation panel is {args.imputation}")
-    print(f"Asserting that reference panel is {args.reference}")
-
-    return args
 
 
 def read_variant_table(args):
