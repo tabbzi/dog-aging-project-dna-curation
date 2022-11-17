@@ -215,7 +215,7 @@ class TraitCaller():
                 'cocoa': self._count('mod_cocoa') > 1,
                 'dilute': self._count('mod_dilute') > 1,
                 'dom_black': self._count('mod_dom_black') > 0,
-                'rec_black': self._count('mod_rec_black') > 0,
+                'rec_black': self._count('mod_rec_black') > 1,
                 'rec_red': self._stepped(default='Y', steps={1: 'C', 0: 'N'}, module='mod_rec_red'),
             },
             index=self.variant_counts.columns,
