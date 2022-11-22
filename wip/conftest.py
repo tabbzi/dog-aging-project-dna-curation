@@ -1,5 +1,6 @@
 import pytest
 from io import StringIO
+from contextlib import contextmanager
 
 
 @pytest.fixture()
@@ -1129,3 +1130,2319 @@ def old_outputs():
         'trailblazerGenotypeTable.csv': trail_geno(),
         'trailblazerPhenotypeTable.tsv': trail_pheno(),
     }
+
+@pytest.fixture()
+def ids():
+    return StringIO(
+        '1\n'
+        '22\n'
+        '333\n'
+    )
+
+
+@pytest.fixture()
+def roh_coi_csv():
+    return StringIO(
+        "id,nSeg,kbTot,kbAvg,coi\n"
+        "1,1838,396380,215.658,0.179865\n"
+        "22,2165,519333,239.876,0.235657\n"
+        "333,1087,176535,162.406,0.0801061\n"
+        "334,1088,176535,162.406,0.0801061\n"
+    )
+
+
+@pytest.fixture()
+def report_pheno():
+    return StringIO(
+        'sample,tab,trait,result,string,value,color,image\n'
+        '1,CoatColor,black,black,Black,,#17181D,\n'
+        '22,CoatColor,black,black_leathers,Black (nose and paws),,#17181D,\n'
+        '333,CoatColor,black,black_solid,Black (solid coat),,#17181D,\n'
+        '1,CoatColor,red,tan,Tan,,#A86B39,\n'
+        '22,CoatColor,red,red,Red,,#7E341B,\n'
+        '333,CoatColor,red,tan,Tan,,#A86B39,\n'
+        '1,CoatPattern,agouti,sable,Sable,,,CoatPattern_locusA_sable.svg\n'
+        '22,CoatPattern,agouti,tan_points_hidden,Tan Points (hidden),,,CoatPattern_locusA_tanPoints.svg\n'
+        '333,CoatPattern,agouti,tan_points_hidden,Tan Points (hidden),,,CoatPattern_locusA_tanPoints.svg\n'
+        '1,CoatPattern,extension,mask,Facial Mask,,,CoatPattern_locusE_mask.svg\n'
+        '22,CoatPattern,extension,rec_red,"No mask, grizzle, or domino patterns",,,\n'
+        '333,CoatPattern,extension,mask_hidden,Facial Mask (hidden),,,CoatPattern_locusE_mask.svg\n'
+        '1,CoatPattern,ticking,no_ticking,,,,\n'
+        '22,CoatPattern,ticking,no_ticking,,,,\n'
+        '333,CoatPattern,ticking,no_ticking,,,,\n'
+        '1,CoatPattern,brindle,not_brindle,,,,\n'
+        '22,CoatPattern,brindle,not_brindle,,,,\n'
+        '333,CoatPattern,brindle,not_brindle,,,,\n'
+        '1,CoatPattern,merle,not_merle,,,,\n'
+        '22,CoatPattern,merle,not_merle,,,,\n'
+        '333,CoatPattern,merle,not_merle,,,,\n'
+        '1,CoatType,Coat Texture,straight_coat,Straight coat,,,CoatType_Curl_straight.svg\n'
+        '22,CoatType,Coat Texture,straight_coat,Straight coat,,,CoatType_Curl_straight.svg\n'
+        '333,CoatType,Coat Texture,wavy_coat,Wavy coat,,,CoatType_Curl_wavy.svg\n'
+        '1,CoatType,Coat Length,short_coat,Short coat,,,CoatType_Length_short.svg\n'
+        '22,CoatType,Coat Length,short_coat,Short coat,,,CoatType_Length_short.svg\n'
+        '333,CoatType,Coat Length,long_coat,Long coat,,,CoatType_Length_long.svg\n'
+        '1,CoatType,Coat Furnishings,no_furnishings,No eyebrow and muzzle furnishings,,,CoatType_Furnishings_unfurnished.svg\n'
+        '22,CoatType,Coat Furnishings,no_furnishings,No eyebrow and muzzle furnishings,,,CoatType_Furnishings_unfurnished.svg\n'
+        '333,CoatType,Coat Furnishings,no_furnishings,No eyebrow and muzzle furnishings,,,CoatType_Furnishings_unfurnished.svg\n'
+        '1,CoatType,Shedding Propensity,normal_shedding,Normal shedding,,,CoatType_Shedding_normal.svg\n'
+        '22,CoatType,Shedding Propensity,low_shedding,Low shedding,,,CoatType_Shedding_low.svg\n'
+        '333,CoatType,Shedding Propensity,low_shedding,Low shedding,,,CoatType_Shedding_low.svg\n'
+        '1,SpecialFeatures,Skeletal - Tail Length,normal_tail,Normal length tail,,,SpecialFeatures_Tail_normal_tail.svg\n'
+        '22,SpecialFeatures,Skeletal - Tail Length,normal_tail,Normal length tail,,,SpecialFeatures_Tail_normal_tail.svg\n'
+        '333,SpecialFeatures,Skeletal - Tail Length,normal_tail,Normal length tail,,,SpecialFeatures_Tail_normal_tail.svg\n'
+        '1,SpecialFeatures,Skeletal - Leg Length,normal_legs,Normal leg length,,,SpecialFeatures_Limbs_normal.svg\n'
+        '22,SpecialFeatures,Skeletal - Leg Length,normal_legs,Normal leg length,,,SpecialFeatures_Limbs_normal.svg\n'
+        '333,SpecialFeatures,Skeletal - Leg Length,normal_legs,Normal leg length,,,SpecialFeatures_Limbs_normal.svg\n'
+        '1,SpecialFeatures,High Altitude Adaptation,not_hypoxia_adapted,No adaptation to high altitudes,,,SpecialFeatures_Altitudes_not_adapted.svg\n'
+        '22,SpecialFeatures,High Altitude Adaptation,not_hypoxia_adapted,No adaptation to high altitudes,,,SpecialFeatures_Altitudes_not_adapted.svg\n'
+        '333,SpecialFeatures,High Altitude Adaptation,not_hypoxia_adapted,No adaptation to high altitudes,,,SpecialFeatures_Altitudes_not_adapted.svg\n'
+        '334,SPecialFeatures,High Altitude Adaptation,not_hypoxia_adapted,No adaptation to high altitudes,,,SpecialFeatures_Altitudes_not_adapted.svg\n'
+    )
+
+
+@pytest.fixture()
+def report_json_table():
+    return StringIO(
+        'sample,tab,name,gene,firstCopy,secondCopy,possibleAlleles,effect\n'
+        '1,CoatColor,Liver - variant p.(C41S),TYRP1,T,T,T & A,0\n'
+        '333,CoatColor,Liver - variant p.(C41S),TYRP1,T,T,T & A,0\n'
+        '22,CoatColor,Liver - variant p.(C41S),TYRP1,T,T,T & A,0\n'
+        '1,CoatColor,Liver - variant p.(P345del),TYRP1,ACCT,ACCT,ACCT & A,0\n'
+        '333,CoatColor,Liver - variant p.(P345del),TYRP1,ACCT,ACCT,ACCT & A,0\n'
+        '22,CoatColor,Liver - variant p.(P345del),TYRP1,ACCT,ACCT,ACCT & A,0\n'
+        '1,CoatColor,Liver - variant p.(Gln331*),TYRP1,C,C,C & T,0\n'
+        '333,CoatColor,Liver - variant p.(Gln331*),TYRP1,C,C,C & T,0\n'
+        '22,CoatColor,Liver - variant p.(Gln331*),TYRP1,C,C,C & T,0\n'
+        '1,CoatColor,Cocoa - variant p.(T807*),HPS3,G,G,G & A,0\n'
+        '333,CoatColor,Cocoa - variant p.(T807*),HPS3,G,G,G & A,0\n'
+        '22,CoatColor,Cocoa - variant p.(T807*),HPS3,G,G,G & A,0\n'
+        '1,CoatColor,Dilution - splice variant,MLPH,G,G,G & A,0\n'
+        '333,CoatColor,Dilution - splice variant,MLPH,G,G,G & A,0\n'
+        '22,CoatColor,Dilution - splice variant,MLPH,G,G,G & A,0\n'
+        '1,CoatColor,Dilution - variant p.(Q235H),MLPH,G,G,G & C,0\n'
+        '333,CoatColor,Dilution - variant p.(Q235H),MLPH,G,G,G & C,0\n'
+        '22,CoatColor,Dilution - variant p.(Q235H),MLPH,G,G,G & C,0\n'
+        '1,CoatColor,Red intensity - marker 1,lincRNA,T,A,T & A,0\n'
+        '333,CoatColor,Red intensity - marker 1,lincRNA,T,A,T & A,0\n'
+        '22,CoatColor,Red intensity - marker 1,lincRNA,A,A,T & A,0\n'
+        '1,CoatColor,Red intensity - marker 2,intergenic,C,C,T & C,0\n'
+        '333,CoatColor,Red intensity - marker 2,intergenic,T,C,T & C,0\n'
+        '22,CoatColor,Red intensity - marker 2,intergenic,T,C,T & C,0\n'
+        '1,CoatColor,Red intensity - marker 3,SLC264A,T,T,T & C,0\n'
+        '333,CoatColor,Red intensity - marker 3,SLC264A,T,T,T & C,0\n'
+        '22,CoatColor,Red intensity - marker 3,SLC264A,T,T,T & C,0\n'
+        '1,CoatColor,Red intensity - marker 4,intergenic,C,C,T & C,0\n'
+        '333,CoatColor,Red intensity - marker 4,intergenic,C,C,T & C,0\n'
+        '22,CoatColor,Red intensity - marker 4,intergenic,C,C,T & C,0\n'
+        '1,CoatColor,Red intensity - marker 5,TYR,G,G,G & A,0\n'
+        '333,CoatColor,Red intensity - marker 5,TYR,G,A,G & A,0\n'
+        '22,CoatColor,Red intensity - marker 5,TYR,G,A,G & A,0\n'
+        '1,CoatPattern,Sable - variant p.(A82S),ASIP,T,T,G & T,0\n'
+        '333,CoatPattern,Sable - variant p.(A82S),ASIP,G,G,G & T,0\n'
+        '22,CoatPattern,Sable - variant p.(A82S),ASIP,G,G,G & T,0\n'
+        '1,CoatPattern,Sable - variant p.(R83H),ASIP,A,A,G & A,0\n'
+        '333,CoatPattern,Sable - variant p.(R83H),ASIP,G,G,G & A,0\n'
+        '22,CoatPattern,Sable - variant p.(R83H),ASIP,G,G,G & A,0\n'
+        '1,CoatPattern,Tan points - marker,ASIP,C,C,C & T,0\n'
+        '333,CoatPattern,Tan points - marker,ASIP,T,T,C & T,0\n'
+        '22,CoatPattern,Tan points - marker,ASIP,T,T,C & T,0\n'
+        '1,CoatPattern,Recessive black - variant p.(R96C),ASIP,C,C,C & T,0\n'
+        '333,CoatPattern,Recessive black - variant p.(R96C),ASIP,C,T,C & T,0\n'
+        '22,CoatPattern,Recessive black - variant p.(R96C),ASIP,C,C,C & T,0\n'
+        '1,CoatPattern,Saddle - marker 1,RALY,C,C,CAGAGTTTCCCCAGGT & C,0\n'
+        '333,CoatPattern,Saddle - marker 1,RALY,C,C,CAGAGTTTCCCCAGGT & C,0\n'
+        '22,CoatPattern,Saddle - marker 1,RALY,C,C,CAGAGTTTCCCCAGGT & C,0\n'
+        '1,CoatPattern,Saddle - marker 2,RALY,G,G,GTCCCCAGGTCAGAGTT & G,0\n'
+        '333,CoatPattern,Saddle - marker 2,RALY,G,G,GTCCCCAGGTCAGAGTT & G,0\n'
+        '22,CoatPattern,Saddle - marker 2,RALY,GTCCCCAGGTCAGAGTT,GTCCCCAGGTCAGAGTT,GTCCCCAGGTCAGAGTT & G,0\n'
+        '1,CoatPattern,Facial mask - variant p.(M264V),MC1R,C,T,T & C,0\n'
+        '333,CoatPattern,Facial mask - variant p.(M264V),MC1R,C,C,T & C,0\n'
+        '22,CoatPattern,Facial mask - variant p.(M264V),MC1R,T,T,T & C,0\n'
+        '1,CoatPattern,Sighthound grizzle - variant p.(G78V),MC1R,C,C,C & A,0\n'
+        '333,CoatPattern,Sighthound grizzle - variant p.(G78V),MC1R,C,C,C & A,0\n'
+        '22,CoatPattern,Sighthound grizzle - variant p.(G78V),MC1R,C,C,C & A,0\n'
+        '1,CoatPattern,Northern domino - variant p.(R301C),MC1R,G,G,G & A,0\n'
+        '333,CoatPattern,Northern domino - variant p.(R301C),MC1R,G,G,G & A,0\n'
+        '22,CoatPattern,Northern domino - variant p.(R301C),MC1R,G,G,G & A,0\n'
+        '1,CoatPattern,Recessive red - variant p.(R306*),MC1R,G,A,G & A,0\n'
+        '333,CoatPattern,Recessive red - variant p.(R306*),MC1R,G,G,G & A,0\n'
+        '22,CoatPattern,Recessive red - variant p.(R306*),MC1R,A,A,G & A,0\n'
+        '1,CoatPattern,Recessive red - regulatory variant,MC1R,C,C,C & G,0\n'
+        '333,CoatPattern,Recessive red - regulatory variant,MC1R,C,C,C & G,0\n'
+        '22,CoatPattern,Recessive red - regulatory variant,MC1R,C,C,C & G,0\n'
+        '1,CoatPattern,Dominant black - variant p.(G23del),CBD103,TCCC,TCCC,TCCC & T,0\n'
+        '333,CoatPattern,Dominant black - variant p.(G23del),CBD103,TCCC,T,TCCC & T,0\n'
+        '22,CoatPattern,Dominant black - variant p.(G23del),CBD103,T,T,TCCC & T,0\n'
+        '1,CoatPattern,Brindle - marker 1,intergenic,A,A,A & AGG,0\n'
+        '333,CoatPattern,Brindle - marker 1,intergenic,A,A,A & AGG,0\n'
+        '22,CoatPattern,Brindle - marker 1,intergenic,A,A,A & AGG,0\n'
+        '1,CoatPattern,Brindle - marker 2,intergenic,GCTTCCCTAAAA,GCTTCCCTAAAA,GCTTCCCTAAAA & G,0\n'
+        '333,CoatPattern,Brindle - marker 2,intergenic,GCTTCCCTAAAA,GCTTCCCTAAAA,GCTTCCCTAAAA & G,0\n'
+        '22,CoatPattern,Brindle - marker 2,intergenic,GCTTCCCTAAAA,GCTTCCCTAAAA,GCTTCCCTAAAA & G,0\n'
+        '1,CoatPattern,Ticking - marker,USH2A,G,G,G & A,0\n'
+        '333,CoatPattern,Ticking - marker,USH2A,G,A,G & A,0\n'
+        '22,CoatPattern,Ticking - marker,USH2A,G,G,G & A,0\n'
+        '1,CoatPattern,Harlequin - variant p.(V49I),PSMB7,T,T,T & G,0\n'
+        '333,CoatPattern,Harlequin - variant p.(V49I),PSMB7,T,T,T & G,0\n'
+        '22,CoatPattern,Harlequin - variant p.(V49I),PSMB7,T,T,T & G,0\n'
+        '1,CoatType,Curly coat - variant p.(R151W),KRT71,C,C,C & T,0\n'
+        '333,CoatType,Curly coat - variant p.(R151W),KRT71,C,T,C & T,0\n'
+        '22,CoatType,Curly coat - variant p.(R151W),KRT71,C,C,C & T,0\n'
+        '1,CoatType,Curly coat - variant p.(S422Rfs),KRT71,CTG,CTG,CTG & C,0\n'
+        '333,CoatType,Curly coat - variant p.(S422Rfs),KRT71,CTG,CTG,CTG & C,0\n'
+        '22,CoatType,Curly coat - variant p.(S422Rfs),KRT71,CTG,CTG,CTG & C,0\n'
+        '1,CoatType,Long coat - variant p.(C95F),FGF5,G,G,G & T,0\n'
+        '333,CoatType,Long coat - variant p.(C95F),FGF5,T,T,G & T,0\n'
+        '22,CoatType,Long coat - variant p.(C95F),FGF5,G,G,G & T,0\n'
+        '1,CoatType,Furnishings - marker,RSPO2,A,A,A & C,0\n'
+        '333,CoatType,Furnishings - marker,RSPO2,A,A,A & C,0\n'
+        '22,CoatType,Furnishings - marker,RSPO2,A,A,A & C,0\n'
+        '1,CoatType,Shedding propensity - variant p.(A237T),MC5R,T,T,T & C,0\n'
+        '333,CoatType,Shedding propensity - variant p.(A237T),MC5R,C,C,T & C,0\n'
+        '22,CoatType,Shedding propensity - variant p.(A237T),MC5R,T,C,T & C,0\n'
+        '1,CoatType,Single-layer coat - marker 1,ADRB1-AU1,T,T,C & T,0\n'
+        '333,CoatType,Single-layer coat - marker 1,ADRB1-AU1,C,C,C & T,0\n'
+        '22,CoatType,Single-layer coat - marker 1,ADRB1-AU1,T,T,C & T,0\n'
+        '1,CoatType,Single-layer coat - marker 2,ADRB1-AU1,A,A,G & A,0\n'
+        '333,CoatType,Single-layer coat - marker 2,ADRB1-AU1,G,G,G & A,0\n'
+        '22,CoatType,Single-layer coat - marker 2,ADRB1-AU1,G,G,G & A,0\n'
+        '1,SpecialFeatures,High altitude hypoxia tolerance - marker 1,EPAS1,G,G,G & A,0\n'
+        '333,SpecialFeatures,High altitude hypoxia tolerance - marker 1,EPAS1,G,G,G & A,0\n'
+        '22,SpecialFeatures,High altitude hypoxia tolerance - marker 1,EPAS1,G,G,G & A,0\n'
+        '1,SpecialFeatures,High altitude hypoxia tolerance - marker 2,EPAS1,T,T,G & T,0\n'
+        '333,SpecialFeatures,High altitude hypoxia tolerance - marker 2,EPAS1,T,T,G & T,0\n'
+        '22,SpecialFeatures,High altitude hypoxia tolerance - marker 2,EPAS1,T,T,G & T,0\n'
+        '1,SpecialFeatures,High altitude hypoxia tolerance - marker 3,EPAS1,G,G,G & A,0\n'
+        '333,SpecialFeatures,High altitude hypoxia tolerance - marker 3,EPAS1,G,G,G & A,0\n'
+        '22,SpecialFeatures,High altitude hypoxia tolerance - marker 3,EPAS1,G,G,G & A,0\n'
+        '1,SpecialFeatures,High altitude hypoxia tolerance - marker 4,EPAS1,C,C,C & T,0\n'
+        '333,SpecialFeatures,High altitude hypoxia tolerance - marker 4,EPAS1,C,C,C & T,0\n'
+        '22,SpecialFeatures,High altitude hypoxia tolerance - marker 4,EPAS1,C,C,C & T,0\n'
+        '1,SpecialFeatures,Blue eyes - marker,ALX4,C,C,C & T,0\n'
+        '333,SpecialFeatures,Blue eyes - marker,ALX4,C,C,C & T,0\n'
+        '22,SpecialFeatures,Blue eyes - marker,ALX4,C,T,C & T,0\n'
+        '1,SpecialFeatures,Shortened legs - marker,FGF4 retrogene on chromosome 18,A,A,A & G,0\n'
+        '333,SpecialFeatures,Shortened legs - marker,FGF4 retrogene on chromosome 18,A,A,A & G,0\n'
+        '22,SpecialFeatures,Shortened legs - marker,FGF4 retrogene on chromosome 18,A,A,A & G,0\n'
+        '1,SpecialFeatures,Long legs - marker 1,ESR1,T,T,C & T,0\n'
+        '333,SpecialFeatures,Long legs - marker 1,ESR1,T,T,C & T,0\n'
+        '22,SpecialFeatures,Long legs - marker 1,ESR1,T,T,C & T,0\n'
+        '1,SpecialFeatures,Long legs - marker 2,ESR1,G,G,A & G,0\n'
+        '333,SpecialFeatures,Long legs - marker 2,ESR1,G,G,A & G,0\n'
+        '22,SpecialFeatures,Long legs - marker 2,ESR1,G,G,A & G,0\n'
+        '1,SpecialFeatures,Long legs - marker 3,ESR1,G,G,T & G,0\n'
+        '333,SpecialFeatures,Long legs - marker 3,ESR1,G,G,T & G,0\n'
+        '22,SpecialFeatures,Long legs - marker 3,ESR1,G,G,T & G,0\n'
+        '1,SpecialFeatures,Natural bob tail - variant p.(I63M),T,G,G,G & C,0\n'
+        '333,SpecialFeatures,Natural bob tail - variant p.(I63M),T,G,G,G & C,0\n'
+        '22,SpecialFeatures,Natural bob tail - variant p.(I63M),T,G,G,G & C,0\n'
+        '23,SpecialFeatures,Natural bob tail - variant p.(I63M),T,G,G,G & C,0\n'
+    )
+
+@pytest.fixture
+def report_body_geno():
+    return StringIO(
+        '"id","name","gene","possibleAlleles","firstCopy","secondCopy","effect"\n'
+        '"1","Chromosome #3 Position: 91085576","near LCORL","A & G","G","A",0\n'
+        '"22","Chromosome #3 Position: 91085576","near LCORL","A & G","G","G",-1\n'
+        '"333","Chromosome #3 Position: 91085576","near LCORL","A & G","G","A",0\n'
+        '"1","Chromosome #4 Position: 67040898","GHR","C & T","C","C",-1\n'
+        '"22","Chromosome #4 Position: 67040898","GHR","C & T","C","C",-1\n'
+        '"333","Chromosome #4 Position: 67040898","GHR","C & T","C","T",0\n'
+        '"1","Chromosome #6 Position: 22864474","HS3ST2","A & G","G","G",-1\n'
+        '"22","Chromosome #6 Position: 22864474","HS3ST2","A & G","A","G",0\n'
+        '"333","Chromosome #6 Position: 22864474","HS3ST2","A & G","A","A",1\n'
+        '"1","Chromosome #10 Position: 8356059","HMGA2","G & T","G","G",1\n'
+        '"22","Chromosome #10 Position: 8356059","HMGA2","G & T","G","G",1\n'
+        '"333","Chromosome #10 Position: 8356059","HMGA2","G & T","G","G",1\n'
+        '"1","Chromosome #12 Position: 33792879","near OGFRL1","G & A","G","G",1\n'
+        '"22","Chromosome #12 Position: 33792879","near OGFRL1","G & A","G","G",1\n'
+        '"333","Chromosome #12 Position: 33792879","near OGFRL1","G & A","A","A",-1\n'
+        '"1","Chromosome #15 Position: 41219654","IGF1","T & C","T","T",1\n'
+        '"22","Chromosome #15 Position: 41219654","IGF1","T & C","C","C",-1\n'
+        '"333","Chromosome #15 Position: 41219654","IGF1","T & C","C","T",0\n'
+        '"1","Chromosome #17 Position: 36295546","ANAPC1","C & T","C","C",1\n'
+        '"22","Chromosome #17 Position: 36295546","ANAPC1","C & T","C","C",1\n'
+        '"333","Chromosome #17 Position: 36295546","ANAPC1","C & T","C","C",1\n'
+        '"1","Chromosome #18 Position: 20428564","FGF4 retrogene","G & GC","G","G",1\n'
+        '"22","Chromosome #18 Position: 20428564","FGF4 retrogene","G & GC","G","G",1\n'
+        '"333","Chromosome #18 Position: 20428564","FGF4 retrogene","G & GC","G","G",1\n'
+        '"1","Chromosome #26 Position: 12761780","near MED13L","G & A","G","G",-1\n'
+        '"22","Chromosome #26 Position: 12761780","near MED13L","G & A","G","G",-1\n'
+        '"333","Chromosome #26 Position: 12761780","near MED13L","G & A","G","A",0\n'
+        '"1","Chromosome #32 Position: 5421641","non-coding","A & T","A","A",-1\n'
+        '"22","Chromosome #32 Position: 5421641","non-coding","A & T","A","A",-1\n'
+        '"333","Chromosome #32 Position: 5421641","non-coding","A & T","A","A",-1\n'
+        '"334","Chromosome #32 Position: 5421641","non-coding","A & T","A","A",-1\n'
+    )
+
+@pytest.fixture
+def report_body_pheno():
+    return StringIO(
+        'id,prediction\n'
+        '1,2.53063333333333\n'
+        '22,2.38136666666667\n'
+        '333,1.90556666666667\n'
+        '334,1.90556666666663\n'
+    )
+
+@pytest.fixture
+def report_white_geno():
+    return StringIO(
+        '"id","name","gene","possibleAlleles","firstCopy","secondCopy","effect"\n'
+        '"1","Chromosome #4 Position: 4882111","non-coding","G & T","G","T",0\n'
+        '"22","Chromosome #4 Position: 4882111","non-coding","G & T","G","G",1\n'
+        '"333","Chromosome #4 Position: 4882111","non-coding","G & T","T","T",-1\n'
+        '"1","Chromosome #5 Position: 63694334","MC1R","G & A","G","A",0\n'
+        '"22","Chromosome #5 Position: 63694334","MC1R","G & A","A","A",-1\n'
+        '"333","Chromosome #5 Position: 63694334","MC1R","G & A","G","G",1\n'
+        '"1","Chromosome #14 Position: 29948181","AGMO","G & A","G","G",1\n'
+        '"22","Chromosome #14 Position: 29948181","AGMO","G & A","G","G",1\n'
+        '"333","Chromosome #14 Position: 29948181","AGMO","G & A","A","A",-1\n'
+        '"1","Chromosome #20 Position: 21792546","MITF","G & A","G","G",1\n'
+        '"22","Chromosome #20 Position: 21792546","MITF","G & A","G","G",1\n'
+        '"333","Chromosome #20 Position: 21792546","MITF","G & A","G","G",1\n'
+        '"1","Chromosome #20 Position: 21797796","MITF","A & C","A","A",1\n'
+        '"22","Chromosome #20 Position: 21797796","MITF","A & C","A","A",1\n'
+        '"333","Chromosome #20 Position: 21797796","MITF","A & C","C","C",-1\n'
+        '"1","Chromosome #20 Position: 21825467","MITF","A & C","A","A",1\n'
+        '"22","Chromosome #20 Position: 21825467","MITF","A & C","A","A",1\n'
+        '"333","Chromosome #20 Position: 21825467","MITF","A & C","A","A",1\n'
+        '"1","Chromosome #20 Position: 21827584","MITF","TTTTTTC & TTTTTTCTTTTTC","TTTTTTC","TTTTTTC",-1\n'
+        '"22","Chromosome #20 Position: 21827584","MITF","TTTTTTC & TTTTTTCTTTTTC","TTTTTTC","TTTTTTC",-1\n'
+        '"333","Chromosome #20 Position: 21827584","MITF","TTTTTTC & TTTTTTCTTTTTC","TTTTTTC","TTTTTTC",-1\n'
+        '"1","Chromosome #20 Position: 21827657","MITF","T & TTTCTTTTC","T","T",1\n'
+        '"22","Chromosome #20 Position: 21827657","MITF","T & TTTCTTTTC","T","T",1\n'
+        '"333","Chromosome #20 Position: 21827657","MITF","T & TTTCTTTTC","TTTCTTTTC","TTTCTTTTC",-1\n'
+        '"1","Chromosome #20 Position: 21829531","MITF","T & TA","T","T",1\n'
+        '"22","Chromosome #20 Position: 21829531","MITF","T & TA","T","T",1\n'
+        '"333","Chromosome #20 Position: 21829531","MITF","T & TA","TA","TA",-1\n'
+        '"1","Chromosome #20 Position: 21834982","MITF","T & A","A","A",1\n'
+        '"22","Chromosome #20 Position: 21834982","MITF","T & A","A","A",1\n'
+        '"333","Chromosome #20 Position: 21834982","MITF","T & A","T","T",-1\n'
+        '"334","Chromosome #20 Position: 21834982","MITF","T & A","T","T",-1\n'
+    )
+
+@pytest.fixture
+def report_white_pheno():
+    return StringIO(
+        'id,prediction\n'
+        '1,5\n'
+        '22,5\n'
+        '333,2\n'
+        '334,3\n'
+    )
+
+@pytest.fixture
+def get_adm():
+    @contextmanager
+    def adm_function(id):
+        breed = id[0]
+        yield StringIO(
+            f'[{{"breed":{breed},"percent":0.9269}},{{"breed":245,"percent":0.0447}}]'
+        )
+
+    return adm_function
+
+@pytest.fixture
+def json_1():
+    return StringIO(
+        '''
+{
+    "id": "1",
+    "inbreeding": 0.179865,
+    "data": [
+        {
+            "breed": 1,
+            "percent": 0.9269
+        },
+        {
+            "breed": 245,
+            "percent": 0.0447
+        }
+    ],
+    "panels": [
+        {
+            "name": "Body Size",
+            "id": "body-size",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    2.6064380952380914
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Chromosome #3 Position: 91085576",
+                        "gene": "near LCORL",
+                        "possibleAlleles": "A & G",
+                        "firstCopy": "G",
+                        "secondCopy": "A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Chromosome #4 Position: 67040898",
+                        "gene": "GHR",
+                        "possibleAlleles": "C & T",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #6 Position: 22864474",
+                        "gene": "HS3ST2",
+                        "possibleAlleles": "A & G",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #10 Position: 8356059",
+                        "gene": "HMGA2",
+                        "possibleAlleles": "G & T",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #12 Position: 33792879",
+                        "gene": "near OGFRL1",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #15 Position: 41219654",
+                        "gene": "IGF1",
+                        "possibleAlleles": "T & C",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #17 Position: 36295546",
+                        "gene": "ANAPC1",
+                        "possibleAlleles": "C & T",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #18 Position: 20428564",
+                        "gene": "FGF4 retrogene",
+                        "possibleAlleles": "G & GC",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #26 Position: 12761780",
+                        "gene": "near MED13L",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #32 Position: 5421641",
+                        "gene": "non-coding",
+                        "possibleAlleles": "A & T",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": -1
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "Colors",
+            "id": "coat-color",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    "Black",
+                    "#17181D",
+                    "Tan",
+                    "#A86B39"
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Liver - variant p.(C41S)",
+                        "gene": "TYRP1",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "T & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Liver - variant p.(P345del)",
+                        "gene": "TYRP1",
+                        "firstCopy": "ACCT",
+                        "secondCopy": "ACCT",
+                        "possibleAlleles": "ACCT & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Liver - variant p.(Gln331*)",
+                        "gene": "TYRP1",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Cocoa - variant p.(T807*)",
+                        "gene": "HPS3",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Dilution - splice variant",
+                        "gene": "MLPH",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Dilution - variant p.(Q235H)",
+                        "gene": "MLPH",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 1",
+                        "gene": "lincRNA",
+                        "firstCopy": "T",
+                        "secondCopy": "A",
+                        "possibleAlleles": "T & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 2",
+                        "gene": "intergenic",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 3",
+                        "gene": "SLC264A",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 4",
+                        "gene": "intergenic",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 5",
+                        "gene": "TYR",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "Coat Pattern",
+            "id": "coat-pattern",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    "CoatPattern_locusA_sable.svg",
+                    "Sable",
+                    "CoatPattern_locusE_mask.svg",
+                    "Facial Mask"
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Sable - variant p.(A82S)",
+                        "gene": "ASIP",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "G & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Sable - variant p.(R83H)",
+                        "gene": "ASIP",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Tan points - marker",
+                        "gene": "ASIP",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Recessive black - variant p.(R96C)",
+                        "gene": "ASIP",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Saddle - marker 1",
+                        "gene": "RALY",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "CAGAGTTTCCCCAGGT & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Saddle - marker 2",
+                        "gene": "RALY",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "GTCCCCAGGTCAGAGTT & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Facial mask - variant p.(M264V)",
+                        "gene": "MC1R",
+                        "firstCopy": "C",
+                        "secondCopy": "T",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Sighthound grizzle - variant p.(G78V)",
+                        "gene": "MC1R",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Northern domino - variant p.(R301C)",
+                        "gene": "MC1R",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Recessive red - variant p.(R306*)",
+                        "gene": "MC1R",
+                        "firstCopy": "G",
+                        "secondCopy": "A",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Recessive red - regulatory variant",
+                        "gene": "MC1R",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Dominant black - variant p.(G23del)",
+                        "gene": "CBD103",
+                        "firstCopy": "TCCC",
+                        "secondCopy": "TCCC",
+                        "possibleAlleles": "TCCC & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Brindle - marker 1",
+                        "gene": "intergenic",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "possibleAlleles": "A & AGG",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Brindle - marker 2",
+                        "gene": "intergenic",
+                        "firstCopy": "GCTTCCCTAAAA",
+                        "secondCopy": "GCTTCCCTAAAA",
+                        "possibleAlleles": "GCTTCCCTAAAA & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Ticking - marker",
+                        "gene": "USH2A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Harlequin - variant p.(V49I)",
+                        "gene": "PSMB7",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "T & G",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "White Spotting",
+            "id": "white-spotting",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    5
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Chromosome #4 Position: 4882111",
+                        "gene": "non-coding",
+                        "possibleAlleles": "G & T",
+                        "firstCopy": "G",
+                        "secondCopy": "T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Chromosome #5 Position: 63694334",
+                        "gene": "MC1R",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Chromosome #14 Position: 29948181",
+                        "gene": "AGMO",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21792546",
+                        "gene": "MITF",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21797796",
+                        "gene": "MITF",
+                        "possibleAlleles": "A & C",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21825467",
+                        "gene": "MITF",
+                        "possibleAlleles": "A & C",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21827584",
+                        "gene": "MITF",
+                        "possibleAlleles": "TTTTTTC & TTTTTTCTTTTTC",
+                        "firstCopy": "TTTTTTC",
+                        "secondCopy": "TTTTTTC",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21827657",
+                        "gene": "MITF",
+                        "possibleAlleles": "T & TTTCTTTTC",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21829531",
+                        "gene": "MITF",
+                        "possibleAlleles": "T & TA",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21834982",
+                        "gene": "MITF",
+                        "possibleAlleles": "T & A",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": 1
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "Coat Type",
+            "id": "coat-type",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    "Coat Texture",
+                    "CoatType_Curl_straight.svg",
+                    "Straight coat",
+                    "Coat Length",
+                    "CoatType_Length_short.svg",
+                    "Short coat",
+                    "Coat Furnishings",
+                    "CoatType_Furnishings_unfurnished.svg",
+                    "No eyebrow and muzzle furnishings",
+                    "Shedding Propensity",
+                    "CoatType_Shedding_normal.svg",
+                    "Normal shedding"
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Curly coat - variant p.(R151W)",
+                        "gene": "KRT71",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Curly coat - variant p.(S422Rfs)",
+                        "gene": "KRT71",
+                        "firstCopy": "CTG",
+                        "secondCopy": "CTG",
+                        "possibleAlleles": "CTG & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Long coat - variant p.(C95F)",
+                        "gene": "FGF5",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Furnishings - marker",
+                        "gene": "RSPO2",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "possibleAlleles": "A & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Shedding propensity - variant p.(A237T)",
+                        "gene": "MC5R",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Single-layer coat - marker 1",
+                        "gene": "ADRB1-AU1",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Single-layer coat - marker 2",
+                        "gene": "ADRB1-AU1",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "Special Features",
+            "id": "special-features",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    "Skeletal - Tail Length",
+                    "SpecialFeatures_Tail_normal_tail.svg",
+                    "Normal length tail",
+                    "Skeletal - Leg Length",
+                    "SpecialFeatures_Limbs_normal.svg",
+                    "Normal leg length",
+                    "High Altitude Adaptation",
+                    "SpecialFeatures_Altitudes_not_adapted.svg",
+                    "No adaptation to high altitudes"
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "High altitude hypoxia tolerance - marker 1",
+                        "gene": "EPAS1",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "High altitude hypoxia tolerance - marker 2",
+                        "gene": "EPAS1",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "G & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "High altitude hypoxia tolerance - marker 3",
+                        "gene": "EPAS1",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "High altitude hypoxia tolerance - marker 4",
+                        "gene": "EPAS1",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Blue eyes - marker",
+                        "gene": "ALX4",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Shortened legs - marker",
+                        "gene": "FGF4 retrogene on chromosome 18",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "possibleAlleles": "A & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Long legs - marker 1",
+                        "gene": "ESR1",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Long legs - marker 2",
+                        "gene": "ESR1",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "A & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Long legs - marker 3",
+                        "gene": "ESR1",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "T & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Natural bob tail - variant p.(I63M)",
+                        "gene": "T",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & C",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        }
+    ]
+}
+        '''
+    )
+
+@pytest.fixture
+def json_22():
+    return StringIO(
+'''
+{
+    "id": "22",
+    "inbreeding": 0.235657,
+    "data": [
+        {
+            "breed": 2,
+            "percent": 0.9269
+        },
+        {
+            "breed": 245,
+            "percent": 0.0447
+        }
+    ],
+    "panels": [
+        {
+            "name": "Body Size",
+            "id": "body-size",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    2.4358476190476233
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Chromosome #3 Position: 91085576",
+                        "gene": "near LCORL",
+                        "possibleAlleles": "A & G",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #4 Position: 67040898",
+                        "gene": "GHR",
+                        "possibleAlleles": "C & T",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #6 Position: 22864474",
+                        "gene": "HS3ST2",
+                        "possibleAlleles": "A & G",
+                        "firstCopy": "A",
+                        "secondCopy": "G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Chromosome #10 Position: 8356059",
+                        "gene": "HMGA2",
+                        "possibleAlleles": "G & T",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #12 Position: 33792879",
+                        "gene": "near OGFRL1",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #15 Position: 41219654",
+                        "gene": "IGF1",
+                        "possibleAlleles": "T & C",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #17 Position: 36295546",
+                        "gene": "ANAPC1",
+                        "possibleAlleles": "C & T",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #18 Position: 20428564",
+                        "gene": "FGF4 retrogene",
+                        "possibleAlleles": "G & GC",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #26 Position: 12761780",
+                        "gene": "near MED13L",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #32 Position: 5421641",
+                        "gene": "non-coding",
+                        "possibleAlleles": "A & T",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": -1
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "Colors",
+            "id": "coat-color",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    "Black (nose and paws)",
+                    "#17181D",
+                    "Red",
+                    "#7E341B"
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Liver - variant p.(C41S)",
+                        "gene": "TYRP1",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "T & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Liver - variant p.(P345del)",
+                        "gene": "TYRP1",
+                        "firstCopy": "ACCT",
+                        "secondCopy": "ACCT",
+                        "possibleAlleles": "ACCT & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Liver - variant p.(Gln331*)",
+                        "gene": "TYRP1",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Cocoa - variant p.(T807*)",
+                        "gene": "HPS3",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Dilution - splice variant",
+                        "gene": "MLPH",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Dilution - variant p.(Q235H)",
+                        "gene": "MLPH",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 1",
+                        "gene": "lincRNA",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "possibleAlleles": "T & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 2",
+                        "gene": "intergenic",
+                        "firstCopy": "T",
+                        "secondCopy": "C",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 3",
+                        "gene": "SLC264A",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 4",
+                        "gene": "intergenic",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 5",
+                        "gene": "TYR",
+                        "firstCopy": "G",
+                        "secondCopy": "A",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "Coat Pattern",
+            "id": "coat-pattern",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    "CoatPattern_locusA_tanPoints.svg",
+                    "Tan Points (hidden)"
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Sable - variant p.(A82S)",
+                        "gene": "ASIP",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Sable - variant p.(R83H)",
+                        "gene": "ASIP",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Tan points - marker",
+                        "gene": "ASIP",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Recessive black - variant p.(R96C)",
+                        "gene": "ASIP",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Saddle - marker 1",
+                        "gene": "RALY",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "CAGAGTTTCCCCAGGT & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Saddle - marker 2",
+                        "gene": "RALY",
+                        "firstCopy": "GTCCCCAGGTCAGAGTT",
+                        "secondCopy": "GTCCCCAGGTCAGAGTT",
+                        "possibleAlleles": "GTCCCCAGGTCAGAGTT & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Facial mask - variant p.(M264V)",
+                        "gene": "MC1R",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Sighthound grizzle - variant p.(G78V)",
+                        "gene": "MC1R",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Northern domino - variant p.(R301C)",
+                        "gene": "MC1R",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Recessive red - variant p.(R306*)",
+                        "gene": "MC1R",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Recessive red - regulatory variant",
+                        "gene": "MC1R",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Dominant black - variant p.(G23del)",
+                        "gene": "CBD103",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "TCCC & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Brindle - marker 1",
+                        "gene": "intergenic",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "possibleAlleles": "A & AGG",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Brindle - marker 2",
+                        "gene": "intergenic",
+                        "firstCopy": "GCTTCCCTAAAA",
+                        "secondCopy": "GCTTCCCTAAAA",
+                        "possibleAlleles": "GCTTCCCTAAAA & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Ticking - marker",
+                        "gene": "USH2A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Harlequin - variant p.(V49I)",
+                        "gene": "PSMB7",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "T & G",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "White Spotting",
+            "id": "white-spotting",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    5
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Chromosome #4 Position: 4882111",
+                        "gene": "non-coding",
+                        "possibleAlleles": "G & T",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #5 Position: 63694334",
+                        "gene": "MC1R",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #14 Position: 29948181",
+                        "gene": "AGMO",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21792546",
+                        "gene": "MITF",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21797796",
+                        "gene": "MITF",
+                        "possibleAlleles": "A & C",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21825467",
+                        "gene": "MITF",
+                        "possibleAlleles": "A & C",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21827584",
+                        "gene": "MITF",
+                        "possibleAlleles": "TTTTTTC & TTTTTTCTTTTTC",
+                        "firstCopy": "TTTTTTC",
+                        "secondCopy": "TTTTTTC",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21827657",
+                        "gene": "MITF",
+                        "possibleAlleles": "T & TTTCTTTTC",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21829531",
+                        "gene": "MITF",
+                        "possibleAlleles": "T & TA",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21834982",
+                        "gene": "MITF",
+                        "possibleAlleles": "T & A",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": 1
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "Coat Type",
+            "id": "coat-type",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    "Coat Texture",
+                    "CoatType_Curl_straight.svg",
+                    "Straight coat",
+                    "Coat Length",
+                    "CoatType_Length_short.svg",
+                    "Short coat",
+                    "Coat Furnishings",
+                    "CoatType_Furnishings_unfurnished.svg",
+                    "No eyebrow and muzzle furnishings",
+                    "Shedding Propensity",
+                    "CoatType_Shedding_low.svg",
+                    "Low shedding"
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Curly coat - variant p.(R151W)",
+                        "gene": "KRT71",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Curly coat - variant p.(S422Rfs)",
+                        "gene": "KRT71",
+                        "firstCopy": "CTG",
+                        "secondCopy": "CTG",
+                        "possibleAlleles": "CTG & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Long coat - variant p.(C95F)",
+                        "gene": "FGF5",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Furnishings - marker",
+                        "gene": "RSPO2",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "possibleAlleles": "A & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Shedding propensity - variant p.(A237T)",
+                        "gene": "MC5R",
+                        "firstCopy": "T",
+                        "secondCopy": "C",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Single-layer coat - marker 1",
+                        "gene": "ADRB1-AU1",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Single-layer coat - marker 2",
+                        "gene": "ADRB1-AU1",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "Special Features",
+            "id": "special-features",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    "Skeletal - Tail Length",
+                    "SpecialFeatures_Tail_normal_tail.svg",
+                    "Normal length tail",
+                    "Skeletal - Leg Length",
+                    "SpecialFeatures_Limbs_normal.svg",
+                    "Normal leg length",
+                    "High Altitude Adaptation",
+                    "SpecialFeatures_Altitudes_not_adapted.svg",
+                    "No adaptation to high altitudes"
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "High altitude hypoxia tolerance - marker 1",
+                        "gene": "EPAS1",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "High altitude hypoxia tolerance - marker 2",
+                        "gene": "EPAS1",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "G & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "High altitude hypoxia tolerance - marker 3",
+                        "gene": "EPAS1",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "High altitude hypoxia tolerance - marker 4",
+                        "gene": "EPAS1",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Blue eyes - marker",
+                        "gene": "ALX4",
+                        "firstCopy": "C",
+                        "secondCopy": "T",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Shortened legs - marker",
+                        "gene": "FGF4 retrogene on chromosome 18",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "possibleAlleles": "A & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Long legs - marker 1",
+                        "gene": "ESR1",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Long legs - marker 2",
+                        "gene": "ESR1",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "A & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Long legs - marker 3",
+                        "gene": "ESR1",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "T & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Natural bob tail - variant p.(I63M)",
+                        "gene": "T",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & C",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        }
+    ]
+}
+    '''
+    )
+
+@pytest.fixture
+def json_333():
+    return StringIO(
+'''
+{
+    "id": "333",
+    "inbreeding": 0.0801061,
+    "data": [
+        {
+            "breed": 3,
+            "percent": 0.9269
+        },
+        {
+            "breed": 245,
+            "percent": 0.0447
+        }
+    ],
+    "panels": [
+        {
+            "name": "Body Size",
+            "id": "body-size",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    1.8920761904761942
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Chromosome #3 Position: 91085576",
+                        "gene": "near LCORL",
+                        "possibleAlleles": "A & G",
+                        "firstCopy": "G",
+                        "secondCopy": "A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Chromosome #4 Position: 67040898",
+                        "gene": "GHR",
+                        "possibleAlleles": "C & T",
+                        "firstCopy": "C",
+                        "secondCopy": "T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Chromosome #6 Position: 22864474",
+                        "gene": "HS3ST2",
+                        "possibleAlleles": "A & G",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #10 Position: 8356059",
+                        "gene": "HMGA2",
+                        "possibleAlleles": "G & T",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #12 Position: 33792879",
+                        "gene": "near OGFRL1",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #15 Position: 41219654",
+                        "gene": "IGF1",
+                        "possibleAlleles": "T & C",
+                        "firstCopy": "C",
+                        "secondCopy": "T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Chromosome #17 Position: 36295546",
+                        "gene": "ANAPC1",
+                        "possibleAlleles": "C & T",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #18 Position: 20428564",
+                        "gene": "FGF4 retrogene",
+                        "possibleAlleles": "G & GC",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #26 Position: 12761780",
+                        "gene": "near MED13L",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Chromosome #32 Position: 5421641",
+                        "gene": "non-coding",
+                        "possibleAlleles": "A & T",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": -1
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "Colors",
+            "id": "coat-color",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    "Black (solid coat)",
+                    "#17181D",
+                    "Tan",
+                    "#A86B39"
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Liver - variant p.(C41S)",
+                        "gene": "TYRP1",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "T & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Liver - variant p.(P345del)",
+                        "gene": "TYRP1",
+                        "firstCopy": "ACCT",
+                        "secondCopy": "ACCT",
+                        "possibleAlleles": "ACCT & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Liver - variant p.(Gln331*)",
+                        "gene": "TYRP1",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Cocoa - variant p.(T807*)",
+                        "gene": "HPS3",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Dilution - splice variant",
+                        "gene": "MLPH",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Dilution - variant p.(Q235H)",
+                        "gene": "MLPH",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 1",
+                        "gene": "lincRNA",
+                        "firstCopy": "T",
+                        "secondCopy": "A",
+                        "possibleAlleles": "T & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 2",
+                        "gene": "intergenic",
+                        "firstCopy": "T",
+                        "secondCopy": "C",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 3",
+                        "gene": "SLC264A",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 4",
+                        "gene": "intergenic",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Red intensity - marker 5",
+                        "gene": "TYR",
+                        "firstCopy": "G",
+                        "secondCopy": "A",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "Coat Pattern",
+            "id": "coat-pattern",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    "CoatPattern_locusA_tanPoints.svg",
+                    "Tan Points (hidden)",
+                    "CoatPattern_locusE_mask.svg",
+                    "Facial Mask (hidden)"
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Sable - variant p.(A82S)",
+                        "gene": "ASIP",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Sable - variant p.(R83H)",
+                        "gene": "ASIP",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Tan points - marker",
+                        "gene": "ASIP",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Recessive black - variant p.(R96C)",
+                        "gene": "ASIP",
+                        "firstCopy": "C",
+                        "secondCopy": "T",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Saddle - marker 1",
+                        "gene": "RALY",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "CAGAGTTTCCCCAGGT & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Saddle - marker 2",
+                        "gene": "RALY",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "GTCCCCAGGTCAGAGTT & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Facial mask - variant p.(M264V)",
+                        "gene": "MC1R",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Sighthound grizzle - variant p.(G78V)",
+                        "gene": "MC1R",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Northern domino - variant p.(R301C)",
+                        "gene": "MC1R",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Recessive red - variant p.(R306*)",
+                        "gene": "MC1R",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Recessive red - regulatory variant",
+                        "gene": "MC1R",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Dominant black - variant p.(G23del)",
+                        "gene": "CBD103",
+                        "firstCopy": "TCCC",
+                        "secondCopy": "T",
+                        "possibleAlleles": "TCCC & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Brindle - marker 1",
+                        "gene": "intergenic",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "possibleAlleles": "A & AGG",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Brindle - marker 2",
+                        "gene": "intergenic",
+                        "firstCopy": "GCTTCCCTAAAA",
+                        "secondCopy": "GCTTCCCTAAAA",
+                        "possibleAlleles": "GCTTCCCTAAAA & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Ticking - marker",
+                        "gene": "USH2A",
+                        "firstCopy": "G",
+                        "secondCopy": "A",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Harlequin - variant p.(V49I)",
+                        "gene": "PSMB7",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "T & G",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "White Spotting",
+            "id": "white-spotting",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    2
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Chromosome #4 Position: 4882111",
+                        "gene": "non-coding",
+                        "possibleAlleles": "G & T",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #5 Position: 63694334",
+                        "gene": "MC1R",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #14 Position: 29948181",
+                        "gene": "AGMO",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21792546",
+                        "gene": "MITF",
+                        "possibleAlleles": "G & A",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21797796",
+                        "gene": "MITF",
+                        "possibleAlleles": "A & C",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21825467",
+                        "gene": "MITF",
+                        "possibleAlleles": "A & C",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "effect": 1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21827584",
+                        "gene": "MITF",
+                        "possibleAlleles": "TTTTTTC & TTTTTTCTTTTTC",
+                        "firstCopy": "TTTTTTC",
+                        "secondCopy": "TTTTTTC",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21827657",
+                        "gene": "MITF",
+                        "possibleAlleles": "T & TTTCTTTTC",
+                        "firstCopy": "TTTCTTTTC",
+                        "secondCopy": "TTTCTTTTC",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21829531",
+                        "gene": "MITF",
+                        "possibleAlleles": "T & TA",
+                        "firstCopy": "TA",
+                        "secondCopy": "TA",
+                        "effect": -1
+                    },
+                    {
+                        "name": "Chromosome #20 Position: 21834982",
+                        "gene": "MITF",
+                        "possibleAlleles": "T & A",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "effect": -1
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "Coat Type",
+            "id": "coat-type",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    "Coat Texture",
+                    "CoatType_Curl_wavy.svg",
+                    "Wavy coat",
+                    "Coat Length",
+                    "CoatType_Length_long.svg",
+                    "Long coat",
+                    "Coat Furnishings",
+                    "CoatType_Furnishings_unfurnished.svg",
+                    "No eyebrow and muzzle furnishings",
+                    "Shedding Propensity",
+                    "CoatType_Shedding_low.svg",
+                    "Low shedding"
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "Curly coat - variant p.(R151W)",
+                        "gene": "KRT71",
+                        "firstCopy": "C",
+                        "secondCopy": "T",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Curly coat - variant p.(S422Rfs)",
+                        "gene": "KRT71",
+                        "firstCopy": "CTG",
+                        "secondCopy": "CTG",
+                        "possibleAlleles": "CTG & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Long coat - variant p.(C95F)",
+                        "gene": "FGF5",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "G & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Furnishings - marker",
+                        "gene": "RSPO2",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "possibleAlleles": "A & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Shedding propensity - variant p.(A237T)",
+                        "gene": "MC5R",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "T & C",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Single-layer coat - marker 1",
+                        "gene": "ADRB1-AU1",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Single-layer coat - marker 2",
+                        "gene": "ADRB1-AU1",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        },
+        {
+            "name": "Special Features",
+            "id": "special-features",
+            "top": {
+                "title": null,
+                "content": "null",
+                "genericValues": [
+                    "Skeletal - Tail Length",
+                    "SpecialFeatures_Tail_normal_tail.svg",
+                    "Normal length tail",
+                    "Skeletal - Leg Length",
+                    "SpecialFeatures_Limbs_normal.svg",
+                    "Normal leg length",
+                    "High Altitude Adaptation",
+                    "SpecialFeatures_Altitudes_not_adapted.svg",
+                    "No adaptation to high altitudes"
+                ]
+            },
+            "results": {
+                "title": null,
+                "content": "null",
+                "traits": [
+                    {
+                        "name": "High altitude hypoxia tolerance - marker 1",
+                        "gene": "EPAS1",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "High altitude hypoxia tolerance - marker 2",
+                        "gene": "EPAS1",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "G & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "High altitude hypoxia tolerance - marker 3",
+                        "gene": "EPAS1",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & A",
+                        "effect": 0
+                    },
+                    {
+                        "name": "High altitude hypoxia tolerance - marker 4",
+                        "gene": "EPAS1",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Blue eyes - marker",
+                        "gene": "ALX4",
+                        "firstCopy": "C",
+                        "secondCopy": "C",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Shortened legs - marker",
+                        "gene": "FGF4 retrogene on chromosome 18",
+                        "firstCopy": "A",
+                        "secondCopy": "A",
+                        "possibleAlleles": "A & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Long legs - marker 1",
+                        "gene": "ESR1",
+                        "firstCopy": "T",
+                        "secondCopy": "T",
+                        "possibleAlleles": "C & T",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Long legs - marker 2",
+                        "gene": "ESR1",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "A & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Long legs - marker 3",
+                        "gene": "ESR1",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "T & G",
+                        "effect": 0
+                    },
+                    {
+                        "name": "Natural bob tail - variant p.(I63M)",
+                        "gene": "T",
+                        "firstCopy": "G",
+                        "secondCopy": "G",
+                        "possibleAlleles": "G & C",
+                        "effect": 0
+                    }
+                ],
+                "genericValues": null
+            }
+        }
+    ]
+}
+    '''
+    )
