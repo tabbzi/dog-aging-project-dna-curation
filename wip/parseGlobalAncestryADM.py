@@ -63,13 +63,12 @@ def save_full_results(data, basename):
     output = data[data['FID']=="0"]
     output['percent'] = output['percent'].round(decimals=4)
 
-    for dog, data in output.groupby('IID'):
-        data.sort_values(by = 'percent')\
-            .to_csv(
-            f"{basename}StudyID-{dog}.fullResults.GlobalAncestry.csv",
-            index = False,
-            columns=['breed', 'percent'],
-        )
+    output.sort_values(by = 'percent')\
+        .to_csv(
+        f"{basename}fullResults.GlobalAncestry.csv",
+        index = False,
+        columns=['IID', 'breed', 'percent'],
+    )
 
 
 def map_to_redcap(data, population_file):
@@ -101,20 +100,18 @@ def map_to_redcap(data, population_file):
 
 
 def save_recap_results(redcap_data, basename):
-    # save each IID result as id, breed, percent
-    for dog, data in redcap_data.groupby('IID'):
-        data.sort_values(by='percent')\
-            .to_csv(
-                f"{basename}StudyID-{dog}.GlobalAncestry.csv",
-                index=False,
-                columns=['id', 'breed', 'percent'],
-            )
-        data[['id', 'percent']]\
-            .rename(columns = {'id': 'breed'})\
-            .to_json(
-                f"{basename}StudyID-{dog}.GlobalAncestry.json",
-                orient='records',
-            )
+    redcap_data.sort_values(by='percent')\
+        .to_csv(
+            f"{basename}GlobalAncestry.csv",
+            index=False,
+            columns=['IID', 'id', 'breed', 'percent'],
+        )
+    redcap_data[['IID', 'id', 'percent']]\
+        .rename(columns = {'id': 'breed'})\
+        .to_json(
+            f"{basename}GlobalAncestry.json",
+            orient='records',
+        )
 
 
 if __name__ == "__main__":

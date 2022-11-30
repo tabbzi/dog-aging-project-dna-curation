@@ -1436,14 +1436,16 @@ def report_white_pheno():
 
 @pytest.fixture
 def get_adm():
-    @contextmanager
-    def adm_function(id):
-        breed = id[0]
-        yield StringIO(
-            f'[{{"breed":{breed},"percent":0.9269}},{{"breed":245,"percent":0.0447}}]'
-        )
-
-    return adm_function
+    return StringIO(
+        '['
+            '{"IID":"1","breed":1,"percent":0.9269},'
+            '{"IID":"1","breed":245,"percent":0.0447},'
+            '{"IID":"22","breed":2,"percent":0.9269},'
+            '{"IID":"22","breed":245,"percent":0.0447},'
+            '{"IID":"333","breed":3,"percent":0.9269},'
+            '{"IID":"333","breed":245,"percent":0.0447}'
+        ']'
+    )
 
 @pytest.fixture
 def json_1():
@@ -1470,7 +1472,7 @@ def json_1():
                 "title": null,
                 "content": "null",
                 "genericValues": [
-                    2.6064380952380914
+                    2.464304166666664
                 ]
             },
             "results": {
@@ -2138,7 +2140,7 @@ def json_22():
                 "title": null,
                 "content": "null",
                 "genericValues": [
-                    2.4358476190476233
+                    2.333695833333336
                 ]
             },
             "results": {
@@ -2804,7 +2806,7 @@ def json_333():
                 "title": null,
                 "content": "null",
                 "genericValues": [
-                    1.8920761904761942
+                    1.9173708333333361
                 ]
             },
             "results": {

@@ -95,7 +95,7 @@ y <- predict(model, d, type = "response")
 
 # generate phenotype table
 phenoTable <- data.frame(id = dogs, prediction = y)
-write.table(phenoTable, file = paste0(predfile, ".", mod, ".phenotypes.csv"), sep = ",", quote = F, row.names = F)
+write.table(phenoTable, file = paste0(mod, ".phenotypes.csv"), sep = ",", quote = F, row.names = F)
 
 # generate genotype table
 genoTable = data %>%
@@ -142,4 +142,4 @@ genoTable = data %>%
                                       COUNTED))) %>%
   mutate(id = gsub("X0_","",id)) %>%
   select(id,name,gene,possibleAlleles,firstCopy,secondCopy,effect)
-write.table(genoTable, file = paste0(predfile, ".", mod, ".genotypes.csv"), sep = ",", row.names = F)
+write.table(genoTable, file = paste0(mod, ".genotypes.csv"), sep = ",", row.names = F)

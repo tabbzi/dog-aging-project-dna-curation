@@ -61,7 +61,7 @@ export input=${input}
 export mod=BodySize
 ./predict/run.sh
 export mod=WhiteSpotting
-# ./predict/run.sh
+./predict/run.sh
 
 # Submit PLINK1 bfile set for inbreeding
 # qsub -v input=${input} CoefficientOfInbreedingROH.sh

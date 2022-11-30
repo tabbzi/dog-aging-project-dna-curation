@@ -13,13 +13,13 @@ import numpy as np
 import pandas as pd
 import json
 from contextlib import contextmanager
+import requests
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
         description=("This script will take a template JSON and results for a "
         "query dog, and populate an output JSON"))
 
-    # TODO take a list of ids as a file or similar
     parser.add_argument("-S", "--study-ids",
                         help="File with study ids to analyze",
                         )
@@ -60,6 +60,10 @@ def parse_args(args=None):
                         help="Output file location with {id} as the id placeholder",
                         default="StudyID-{id}_GenomicReport.json")
 
+    parser.add_argument("-H", "--webhook",
+                        help="Webhook to signal, if unset will not make any requests",
+                        default=None)
+
 
     return parser.parse_args(args)
 
@@ -67,12 +71,12 @@ def parse_args(args=None):
 class JsonBuilder:
     def __init__(self, args):
         self.coi = pd.read_csv(args.inbreeding, dtype={'id': str})
-        self.ancestry_base = args.ancestry
+        self.ancestry = pd.read_json(args.ancestry, orient="records", dtype=False)
 
         self.size_pheno = pd.read_csv(args.body_size_phenotypes,
                                       dtype={'id': str})
         # rescale from [0,4] to [0.25,3.75] on [0,4] scale
-        self.size_pheno['prediction'] = 4 * (self.size_pheno['prediction'] - 0.25) / 3.5
+        self.size_pheno['prediction'] = (3.5 * self.size_pheno['prediction'] + 1) / 4
 
         self.size_geno = pd.read_csv(args.body_size_genotypes,
                                       dtype={'id': str})
@@ -111,13 +115,9 @@ class JsonBuilder:
         return self.coi.loc[self.coi['id'] == id, 'coi'].iloc[0]
 
     def get_ancestry(self, id):
-        with self._get_ancestry(id) as ancestry:
-            return json.load(ancestry)
-
-    @contextmanager
-    def _get_ancestry(self, id):
-        with open(self.ancestry_base.format(id=id)) as handle:
-            yield handle
+        return json.loads(self.ancestry.loc[
+                self.ancestry.IID == id, ['breed', 'percent']
+            ].to_json(orient="records"))
 
     def body_size(self, id):
         top_values = [self.size_pheno.loc[self.size_pheno.id == id, 'prediction'].iloc[0]]
@@ -202,12 +202,20 @@ def main():
     for id in open(args.study_ids):
         id = id.strip()
         with open(args.output.format(id=id), 'w') as outfile:
-            json.dump(builder.build_json(id),
+            data = builder.build_json(id)
+            json.dump(data,
                       fp=outfile,
                       sort_keys=False,
                       indent=4,
                       cls=NpEncoder,
                       )
+            if args.webhook:
+                request = requests.pos(args.webhook, json=data)
+                if request.status_code != 200:
+                    print(f"Failed to post sample '{id}'. "
+                          f"Response code {request.status_code}")
+                else:
+                    print(f"Posted sample '{id}'.")
 
 
 if __name__ == "__main__":
