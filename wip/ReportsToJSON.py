@@ -201,6 +201,9 @@ def main():
 
     for id in open(args.study_ids):
         id = id.strip()
+        if id.startswith('Friend') or ':' in id:
+            print(f'Excluding {id} from analysis.')
+            continue
         with open(args.output.format(id=id), 'w') as outfile:
             data = builder.build_json(id)
             json.dump(data,

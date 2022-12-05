@@ -38,7 +38,7 @@ dogs <- gsub("X","",dogs)
 
 # extract IID
 for(i in 1:length(dogs)){
-  dogs[i] <- strsplit(dogs[i],"_")[[1]][2]
+  dogs[i] <- sub('^[^_]+_', '', dogs[i])  # remove leading FID
   }
 
 # CALLED & MATCH ALLELES: join to query .traw by chromosome, position, counted allele, alt allele
