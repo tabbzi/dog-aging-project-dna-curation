@@ -213,7 +213,7 @@ def main():
                       cls=NpEncoder,
                       )
             if args.webhook:
-                request = requests.post(args.webhook, json=data)
+                request = requests.post(args.webhook, data=json.dumps(data, cls=NpEncoder), headers={'Content-Type': 'application/json'})
                 if request.status_code != 200:
                     print(f"Failed to post sample '{id}'. "
                           f"Response code {request.status_code}")
