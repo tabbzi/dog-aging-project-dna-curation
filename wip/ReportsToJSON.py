@@ -8,244 +8,218 @@
 #================================================================
 # Initialization
 #================================================================
-import sys, argparse
-import os
+import argparse
 import numpy as np
 import pandas as pd
 import json
-workdir=os.getcwd()
+from contextlib import contextmanager
+import requests
 
-parser = argparse.ArgumentParser(description="This script will take a template JSON and results for a query dog, and populate the JSON")
+def parse_args(args=None):
+    parser = argparse.ArgumentParser(
+        description=("This script will take a template JSON and results for a "
+        "query dog, and populate an output JSON"))
 
-parser.add_argument("-J", "--json",
-                    help="input template JSON",
-                    default="ref/GenomicReport_TemplateJSON.json")
+    parser.add_argument("-S", "--study-ids",
+                        help="File with study ids to analyze",
+                        )
 
-parser.add_argument("-S", "--studyid",
-                    help="input study ID",
-                    default="3")
+    parser.add_argument("-A", "--ancestry",
+                        help="input ancestry table or json with fields `breed` and `percent`, use {id} as id placeholder",
+                        default="StudyID-{id}.GlobalAncestry.json")
 
-parser.add_argument("-A", "--ancestry",
-                    help="input ancestry table or json with fields `breed` and `percent`",
-                    default="StudyID-3.GlobalAncestry.json")
+    parser.add_argument("-I", "--inbreeding",
+                        help="input coefficient of inbreeding value or file of COIs",
+                        default="COI.csv")
 
-parser.add_argument("-I", "--inbreeding",
-                    help="input coefficient of inbreeding value or file of COIs",
-                    default="COI.csv")
+    parser.add_argument("-SP", "--body-size-phenotypes",
+                        help="input phenotypes table for complex trait prediction of body size",
+                        default="BodySize.phenotypes.csv")
 
-parser.add_argument("-C", "--coifile",
-                    help="",
-                    default="true")
+    parser.add_argument("-SG", "--body-size-genotypes",
+                        help="input genotypes table for complex trait prediction of body size",
+                        default="BodySize.genotypes.csv")
 
-parser.add_argument("-SP", "--sizephenofile",
-                    help="input phenotypes table for complex trait prediction of body size",
-                    default="BodySize.phenotypes.csv")
+    parser.add_argument("-WP", "--white-spotting-phenotypes",
+                        help="input phenotypes table for complex trait prediction of white spotting",
+                        default="WhiteSpotting.phenotypes.csv")
 
-parser.add_argument("-SG", "--sizegenofile",
-                    help="input genotypes table for complex trait prediction of body size",
-                    default="BodySize.genotypes.csv")
+    parser.add_argument("-WG", "--white-spotting-genotypes",
+                        help="input genotypes table for complex trait prediction of white spotting",
+                        default="WhiteSpotting.genotypes.csv")
 
-parser.add_argument("-WP", "--whitephenofile",
-                    help="input phenotypes table for complex trait prediction of white spotting",
-                    default="WhiteSpotting.phenotypes.csv")
+    parser.add_argument("-P", "--phenotypes",
+                        help="input phenotypes table for simple trait predictions, collated by `tab` and `trait`",
+                        default="phenotypeTable.csv")
 
-parser.add_argument("-WG", "--whitegenofile",
-                    help="input genotypes table for complex trait prediction of white spotting",
-                    default="WhiteSpotting.genotypes.csv")
+    parser.add_argument("-G", "--genotypes",
+                        help="input genotypes table for simple trait predictions, collated by `tab` and `trait`",
+                        default="jsonTable.csv")
 
-parser.add_argument("-P", "--phenotypes",
-                    help="input phenotypes table for simple trait predictions, collated by `tab` and `trait`",
-                    default="phenotypeTable.csv")
+    parser.add_argument("-O", "--output",
+                        help="Output file location with {id} as the id placeholder",
+                        default="StudyID-{id}_GenomicReport.json")
 
-parser.add_argument("-G", "--genotypes",
-                    help="input genotypes table for simple trait predictions, collated by `tab` and `trait`",
-                    default="jsonTable.csv")
+    parser.add_argument("-H", "--webhook",
+                        help="Webhook to signal, if unset will not make any requests",
+                        default=None)
 
-parser.add_argument("-H", "--html",
-                    help="fill in HTML elements for content? `noHTML` if not",
-                    default="noHTML")
 
-args = parser.parse_args()
+    return parser.parse_args(args)
 
-#================================================================
-# LOAD JSON
-#================================================================
-tmpJSON = json.load(open(args.json))
 
-dogJSON = tmpJSON
-dogJSON['id'] = str(args.studyid)
+class JsonBuilder:
+    def __init__(self, args):
+        self.coi = pd.read_csv(args.inbreeding, dtype={'id': str})
+        self.ancestry = pd.read_json(args.ancestry, orient="records", dtype=False)
 
-#================================================================
-# BREED ANCESTRY
-#================================================================
-dogADM = json.load(open(args.ancestry))
+        self.size_pheno = pd.read_csv(args.body_size_phenotypes,
+                                      dtype={'id': str})
+        # rescale from [0,4] to [0.25,3.75] on [0,4] scale
+        self.size_pheno['prediction'] = (3.5 * self.size_pheno['prediction'] + 1) / 4
 
-dogJSON['data'] = dogADM
+        self.size_geno = pd.read_csv(args.body_size_genotypes,
+                                      dtype={'id': str})
+        self.size_geno['effect'] = self.size_geno['effect'].round(0)
 
-#================================================================
-# COEFFICIENT OF INBREEDING
-#================================================================
-if args.coifile == "true":
-    coifile = pd.read_csv(args.inbreeding)
-    dogCOI = coifile[coifile['id'].astype('str') == str(args.studyid)]['coi'].values[0]
-else:
-    dogCOI = args.inbreeding
+        self.pheno_traits = pd.read_csv(args.phenotypes,
+                                        dtype={'sample': str})
+        self.geno_traits = pd.read_csv(args.genotypes,
+                                        dtype={'sample': str})
 
-dogJSON['inbreeding'] = dogCOI
+        self.white_pheno = pd.read_csv(args.white_spotting_phenotypes,
+                                       dtype={'id': str})
+        self.white_geno = pd.read_csv(args.white_spotting_genotypes,
+                                       dtype={'id': str})
+        self.white_geno['effect'] = self.white_geno['effect'].round(0)
 
-#================================================================
-# TRAIT PREDICTIONS: Predictive Models
-#================================================================
+    def build_json(self, id):
+        geno = self.geno_traits[self.geno_traits['sample'] == id]
+        pheno = self.pheno_traits[self.pheno_traits['sample'] == id]
+        return {
+            'id': id,
+            'inbreeding': self.get_coi(id),
+            'data': self.get_ancestry(id),
+            'panels': [
+                self.body_size(id),
+                self.coat_color(geno, pheno),
+                self.coat_pattern(geno, pheno),
+                self.white_spotting(id),
+                self.coat_type(geno, pheno),
+                self.special_features(geno, pheno),
+            ],
+        }
 
-# HTML 'content'
-if args.html == "noHTML":
-    # BodySize
-    dogJSON['panels'][0]['top']['content'] = "null"
-    dogJSON['panels'][0]['results']['content'] = "null"
+    def get_coi(self, id):
+        # get first matching id
+        return self.coi.loc[self.coi['id'] == id, 'coi'].iloc[0]
 
-    # WhiteSpotting
-    dogJSON['panels'][3]['top']['content'] = "null"
-    dogJSON['panels'][3]['results']['content'] = "null"
-else:
-    # BodySize
-    dogJSON['panels'][0]['top']['content'] = open("/seq/vgb/dap/json/html/GenomicReports.BodySize.top.content.html").read().replace('\n', "")
-    dogJSON['panels'][0]['results']['content'] = open("/seq/vgb/dap/json/html/GenomicReports.BodySize.results.content.html").read().replace('\n', "")
+    def get_ancestry(self, id):
+        return json.loads(self.ancestry.loc[
+                self.ancestry.IID == id, ['breed', 'percent']
+            ].to_json(orient="records"))
 
-    # WhiteSpotting
-    dogJSON['panels'][3]['top']['content'] = open("/seq/vgb/dap/json/html/GenomicReports.WhiteSpotting.top.content.html").read().replace('\n', "")
-    dogJSON['panels'][3]['results']['content'] = open("/seq/vgb/dap/json/html/GenomicReports.WhiteSpotting.results.content.html").read().replace('\n', "")
+    def body_size(self, id):
+        top_values = [self.size_pheno.loc[self.size_pheno.id == id, 'prediction'].iloc[0]]
 
-# top: 'genericValues'
+        result_traits = self.size_geno[self.size_geno['id'] == id]
+        result_traits = result_traits.drop(columns=['id'])
 
-# BodySize
-phenoBodySize = pd.read_csv(args.sizephenofile)
-dogPheno_BodySize = phenoBodySize[phenoBodySize['id'].astype('str') == str(args.studyid)]['prediction'].values[0]
+        return self._panel_base("body-size", top_values, result_traits)
 
-# rescale from [0,4] to [0.25,3.75] on [0,4] scale
-oldVal = dogPheno_BodySize
-rmin=0.25
-rmax=3.75
-tmin=0.00
-tmax=4.00
-newVal = (((oldVal-rmin)/(rmax-rmin))*(tmax-tmin))+tmin
-print(oldVal)
-print(newVal)
-dogPheno_BodySize = newVal
-dogJSON['panels'][0]['top']['genericValues'] = np.array([dogPheno_BodySize])
+    def coat_color(self, geno, pheno):
+        return self._trait_panel("coat-color", geno, pheno, columns=['string', 'color'], name='Colors')
 
-# WhiteSpotting
-phenoWhiteSpotting = pd.read_csv(args.whitephenofile)
-dogPheno_WhiteSpotting = phenoWhiteSpotting[phenoWhiteSpotting['id'].astype('str') == str(args.studyid)]['prediction'].values[0]
-dogJSON['panels'][3]['top']['genericValues'] = np.array([dogPheno_WhiteSpotting])
+    def coat_pattern(self, geno, pheno):
+        pheno = pheno[pheno.image.notnull()]
+        return self._trait_panel("coat-pattern", geno, pheno, columns=['image', 'string'])
 
-# results: 'traits'
+    def white_spotting(self, id):
+        top_values = [self.white_pheno.loc[self.white_pheno.id == id, 'prediction'].iloc[0]]
 
-# BodySize
-genoBodySize = pd.read_csv(args.sizegenofile)
-genoBodySize['effect'] = genoBodySize['effect'].round(0)
-dogGeno_BodySize = genoBodySize[genoBodySize['id'].astype('str') == str(args.studyid)].drop(columns = ['id']).to_dict(orient='records')
-dogJSON['panels'][0]['results']['traits'] = dogGeno_BodySize
+        result_traits = self.white_geno[self.white_geno['id'] == id]
+        result_traits = result_traits.drop(columns=['id'])
 
-# WhiteSpotting
-genoWhiteSpotting = pd.read_csv(args.whitegenofile)
-genoWhiteSpotting['effect'] = genoWhiteSpotting['effect'].round(0)
-dogGeno_WhiteSpotting = genoWhiteSpotting[genoWhiteSpotting['id'].astype('str') == str(args.studyid)].drop(columns = ['id']).to_dict(orient='records')
-dogJSON['panels'][3]['results']['traits'] = dogGeno_WhiteSpotting
+        return self._panel_base("white-spotting", top_values, result_traits)
 
-#================================================================
-# TRAIT PREDICTIONS: SIMPLE MODELS
-#================================================================
+    def coat_type(self, geno, pheno):
+        return self._trait_panel("coat-type", geno, pheno)
 
-# load tables
-genoTraits = pd.read_csv(args.genotypes)
-dogGenoTraits = genoTraits[genoTraits['sample'].astype('str') == str(args.studyid)]
-phenoTraits = pd.read_csv(args.phenotypes)
-dogPhenoTraits = phenoTraits[phenoTraits['sample'].astype('str') == str(args.studyid)]
+    def special_features(self, geno, pheno):
+        return self._trait_panel("special-features", geno, pheno)
 
-# HTML 'content'
-if args.html == "noHTML":
-    # CoatColor
-    dogJSON['panels'][1]['top']['content'] = "null"
-    dogJSON['panels'][1]['results']['content'] = "null"
+    def _trait_panel(self, id, geno, pheno, columns=['trait', 'image', 'string'], name=None):
+        return self._panel_base(
+            id,
+            *self._filter_frames(id, geno, pheno, columns=columns),
+            name=name,
+        )
 
-    # CoatPattern
-    dogJSON['panels'][2]['top']['content'] = "null"
-    dogJSON['panels'][2]['results']['content'] = "null"
+    @staticmethod
+    def _filter_frames(id, geno, pheno, columns):
+        tab = id.title().replace('-', '')
+        return (
+            pheno.loc[pheno.tab == tab, columns],
+            geno[geno.tab == tab].drop(columns=['sample', 'tab'])
+        )
 
-    # CoatType
-    dogJSON['panels'][4]['top']['content'] = "null"
-    dogJSON['panels'][4]['results']['content'] = "null"
+    @staticmethod
+    def _panel_base(id, top_values, result_traits, name=None):
+        if not isinstance(top_values, list):
+            top_values = top_values.values.flatten().tolist()
 
-    # SpecialFeatures
-    dogJSON['panels'][5]['top']['content'] = "null"
-    dogJSON['panels'][5]['results']['content'] = "null"
-else:
-    # CoatColor
-    dogJSON['panels'][1]['top']['content'] = open("/seq/vgb/dap/json/html/GenomicReports.CoatColor.top.content.html").read().replace('\n', "")
-    dogJSON['panels'][1]['results']['content'] = open("/seq/vgb/dap/json/html/GenomicReports.CoatColor.results.content.html").read().replace('\n', "")
+        if name is None:
+            # "coat-type" to "Coat Type"
+            name = id.replace('-', ' ').title()
 
-    # CoatPattern
-    dogJSON['panels'][2]['top']['content'] = open("/seq/vgb/dap/json/html/GenomicReports.CoatPattern.top.content.html").read().replace('\n', "")
-    dogJSON['panels'][2]['results']['content'] = open("/seq/vgb/dap/json/html/GenomicReports.CoatPattern.results.content.html").read().replace('\n', "")
+        return {
+            'name': name,
+            'id': id,
+            'top': {
+                'title': None,
+                'content': "null",
+                'genericValues': top_values,
+            },
+            'results': {
+                'title': None,
+                'content': "null",
+                'traits': result_traits.to_dict(orient = 'records'),
+                'genericValues': None,
+            },
+        }
 
-# top: 'genericValues'
 
-# CoatColor
-genericValues = []
-for index, row in dogPhenoTraits[dogPhenoTraits['tab']=="CoatColor"].iterrows():
-    genericValues.append(row['string'])
-    genericValues.append(row['color'])
-dogJSON['panels'][1]['top']['genericValues'] = np.array(genericValues)
-
-# CoatPattern
-genericValues = []
-for index, row in dogPhenoTraits[dogPhenoTraits['tab']=="CoatPattern"][dogPhenoTraits['image'].notnull()].iterrows():
-    genericValues.append(row['image'])
-    genericValues.append(row['string'])
-dogJSON['panels'][2]['top']['genericValues'] = np.array(genericValues)
-
-# CoatType
-genericValues = []
-for index, row in dogPhenoTraits[dogPhenoTraits['tab']=="CoatType"].iterrows():
-    genericValues.append(row['trait'])
-    genericValues.append(row['image'])
-    genericValues.append(row['string'])
-dogJSON['panels'][4]['top']['genericValues'] = np.array(genericValues)
-
-# SpecialFeatures
-genericValues = []
-for index, row in dogPhenoTraits[dogPhenoTraits['tab']=="SpecialFeatures"].iterrows():
-    genericValues.append(row['trait'])
-    genericValues.append(row['image'])
-    genericValues.append(row['string'])
-dogJSON['panels'][5]['top']['genericValues'] = np.array(genericValues)
-
-# results: 'traits'
-
-# CoatColor
-dogJSON['panels'][1]['results']['traits'] = dogGenoTraits[dogGenoTraits['tab']=="CoatColor"].drop(columns = ['sample','tab']).to_dict(orient = 'records')
-
-# CoatPattern
-dogJSON['panels'][2]['results']['traits'] = dogGenoTraits[dogGenoTraits['tab']=="CoatPattern"].drop(columns = ['sample','tab']).to_dict(orient = 'records')
-
-# CoatType
-dogJSON['panels'][4]['results']['traits'] = dogGenoTraits[dogGenoTraits['tab']=="CoatType"].drop(columns = ['sample','tab']).to_dict(orient = 'records')
-
-# SpecialFeatures
-dogJSON['panels'][5]['results']['traits'] = dogGenoTraits[dogGenoTraits['tab']=="SpecialFeatures"].drop(columns = ['sample','tab']).to_dict(orient = 'records')
-
-#================================================================
-# OUTPUT
-#================================================================
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.integer):
             return int(obj)
-        if isinstance(obj, np.floating):
-            return float(obj)
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
         return super(NpEncoder, self).default(obj)
 
-with open("StudyID-" + str(args.studyid) + "_GenomicReport.json", 'w') as outfile:
-    json.dump(obj = dogJSON, fp = outfile, sort_keys=False, indent=4, cls=NpEncoder)
+def main():
+    args = parse_args()
+    builder = JsonBuilder(args)
+
+    for id in open(args.study_ids):
+        id = id.strip()
+        if id.startswith('Friend') or ':' in id:
+            print(f'Excluding {id} from analysis.')
+            continue
+        with open(args.output.format(id=id), 'w') as outfile:
+            data = builder.build_json(id)
+            json.dump(data,
+                      fp=outfile,
+                      sort_keys=False,
+                      indent=4,
+                      cls=NpEncoder,
+                      )
+            if args.webhook:
+                request = requests.pos(args.webhook, json=data)
+                if request.status_code != 200:
+                    print(f"Failed to post sample '{id}'. "
+                          f"Response code {request.status_code}")
+                else:
+                    print(f"Posted sample '{id}'.")
+
+
+if __name__ == "__main__":
+    main()

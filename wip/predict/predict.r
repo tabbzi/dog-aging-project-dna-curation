@@ -38,7 +38,7 @@ dogs <- gsub("X","",dogs)
 
 # extract IID
 for(i in 1:length(dogs)){
-  dogs[i] <- strsplit(dogs[i],"_")[[1]][2]
+  dogs[i] <- sub('^[^_]+_', '', dogs[i])  # remove leading FID
   }
 
 # CALLED & MATCH ALLELES: join to query .traw by chromosome, position, counted allele, alt allele
@@ -95,7 +95,7 @@ y <- predict(model, d, type = "response")
 
 # generate phenotype table
 phenoTable <- data.frame(id = dogs, prediction = y)
-write.table(phenoTable, file = paste0(predfile, ".", mod, ".phenotypes.csv"), sep = ",", quote = F, row.names = F)
+write.table(phenoTable, file = paste0(mod, ".phenotypes.csv"), sep = ",", quote = F, row.names = F)
 
 # generate genotype table
 genoTable = data %>%
@@ -142,4 +142,4 @@ genoTable = data %>%
                                       COUNTED))) %>%
   mutate(id = gsub("X0_","",id)) %>%
   select(id,name,gene,possibleAlleles,firstCopy,secondCopy,effect)
-write.table(genoTable, file = paste0(predfile, ".", mod, ".genotypes.csv"), sep = ",", row.names = F)
+write.table(genoTable, file = paste0(mod, ".genotypes.csv"), sep = ",", row.names = F)

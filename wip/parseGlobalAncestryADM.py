@@ -1,83 +1,126 @@
 #!/usr/bin/python
 
-import sys, argparse, os
+import argparse
+import os
+import sys
+
 import numpy as np
 import pandas as pd
 
-parser = argparse.ArgumentParser(description="This script will ")
 
-parser.add_argument("-S",
-                    "--samples",
-                    help="query sample IDs",
-                    default="query.txt")
+def parse(args=None):
+    parser = argparse.ArgumentParser(
+        description=("This script will parse admixture outputs "
+                     "to csv and json files for DAP"),
+    )
 
-parser.add_argument("-Q",
-                    "--admQ",
-                    help="ADMIXTURE .Q file with labels",
-                    default="query.Q.labeled")
+    parser.add_argument("-S",
+                        "--samples",
+                        help="query sample IDs",
+                        default="query.txt")
 
-parser.add_argument("-P",
-                    "--pops",
-                    help="RedCap population key",
-                    default="/seq/vgb/dap/bin/DAPBreedKey.tsv")
+    parser.add_argument("-Q",
+                        "--admQ",
+                        help="ADMIXTURE .Q file with labels",
+                        default="query.Q.labeled")
 
-args = parser.parse_args()
+    parser.add_argument("-P",
+                        "--pops",
+                        help="RedCap population key",
+                        )
 
-populations = pd.read_csv(args.pops, sep = " ")
+    parser.add_argument("-O",
+                        "--basename",
+                        help="Base directory to output files",
+                        default="./")
 
-samples = np.array(open(args.samples).read().splitlines())
-
-adm = pd.read_csv(args.admQ, header=None, delim_whitespace=True)
-
-# define populations in proper order
-admDog = adm[adm[1].isin(samples)]
-admRef = adm[~adm[1].isin(samples)]
-refPop = admRef[0].unique()
-
-admDog.columns = np.append(['FID','IID'],refPop)
+    return parser.parse_args(args)
 
 
-admDogLong = pd.melt(admDog, id_vars = ['FID','IID'], value_vars = refPop, var_name = 'breed', value_name = 'percent')
+def read_data(args):
+    samples = np.loadtxt(args.samples, dtype=str)
 
-admDogLong = admDogLong[admDogLong['percent']>0.01].reset_index()
-# admDogLongOut = admDogLong
-admDogLongOut = admDogLong[admDogLong['FID']=="0"]
-admDogLongOut['percent'] = admDogLongOut['percent'].round(decimals=4)
-for dog, data in admDogLongOut.groupby('IID'):
-    data[['breed','percent']].sort_values(by = 'percent').to_csv("StudyID-{}.fullResults.GlobalAncestry.csv".format(dog), index = False)
+    admixture = pd.read_csv(args.admQ, header=None, delim_whitespace=True)
 
-# remap populations not in RedCap that have close populations:
-# admDogLong['breed'] = admDogLong['breed'].replace({'yorkshire_terrier': 'oopsie'})
-admDogLong['breed'] = admDogLong['breed'].replace({'landseer': 'newfoundland'})
+    # define populations in proper order
+    refPop = admixture[~admixture[1].isin(samples)][0].unique()
+    admixture = admixture[admixture[1].isin(samples)]
 
-admDogLong['breed'] = admDogLong['breed'].replace({'white_swiss_shepherd_dog': 'german_shepherd_dog'})
+    admixture.columns = np.append(['FID', 'IID'], refPop)
 
-admDogLong['breed'] = admDogLong['breed'].replace({'village_dog_australia': 'village_dog'})
-admDogLong['breed'] = admDogLong['breed'].replace({'village_dog_china': 'village_dog'})
-admDogLong['breed'] = admDogLong['breed'].replace({'village_dog_india': 'village_dog'})
-admDogLong['breed'] = admDogLong['breed'].replace({'village_dog_namibia': 'village_dog'})
-admDogLong['breed'] = admDogLong['breed'].replace({'village_dog_nigeria': 'village_dog'})
-admDogLong['breed'] = admDogLong['breed'].replace({'village_dog_portugal': 'village_dog'})
-admDogLong['breed'] = admDogLong['breed'].replace({'village_dog_qatar': 'village_dog'})
-admDogLong['breed'] = admDogLong['breed'].replace({'village_dog_vietnam': 'village_dog'})
+    admixture = pd.melt(
+        admixture,
+        id_vars=['FID', 'IID'],
+        value_vars=refPop,
+        var_name='breed',
+        value_name='percent',
+    )
 
-# admDogLong['breed'] = admDogLong['breed'].replace({'coyote': 'wolf'})
-admDogLong['breed'] = admDogLong['breed'].replace({'wolf_north_american': 'wolf'})
-admDogLong['breed'] = admDogLong['breed'].replace({'wolf_eurasian': 'wolf'})
+    return admixture[admixture['percent']>0.01].reset_index()
 
-# combine same breed by summing percent
-admDogLong = admDogLong.groupby(['FID','IID','breed'])['percent'].sum().reset_index()
 
-# map RedCap population index:
-admDogMap = admDogLong.merge(populations, how = 'inner', on = 'breed')
+def save_full_results(data, basename):
+    output = data[data['FID']=="0"]
+    output['percent'] = output['percent'].round(decimals=4)
 
-# round percents:
-admDogMap['percent'] = admDogMap['percent'].round(decimals=4)
+    output.sort_values(by = 'percent')\
+        .to_csv(
+        f"{basename}fullResults.GlobalAncestry.csv",
+        index = False,
+        columns=['IID', 'breed', 'percent'],
+    )
 
-# drop refs
-admDogMap = admDogMap[admDogMap['FID']=="0"]
 
-# save each IID results as id, breed, percent
-for dog, data in admDogMap.groupby('IID'):
-    data[['id','breed','percent']].sort_values(by = 'percent').to_csv("StudyID-{}.GlobalAncestry.csv".format(dog), index = False)
-    data[['id','percent']].rename(columns = {'id': 'breed'}).to_json("StudyID-{}.GlobalAncestry.json".format(dog), orient='records')
+def map_to_redcap(data, population_file):
+    populations = pd.read_csv(population_file, sep=" ")
+
+    # remap populations not in RedCap that have close populations:
+    data['breed'] = data['breed'].replace(
+        regex={
+            r'^landseer$': 'newfoundland',
+            r'^white_swiss_shepherd_dog$': 'german_shepherd_dog',
+            r'^village_dog_.*$': 'village_dog',
+            r'^wolf.*$': 'wolf',
+        }
+    )
+
+    # combine same breed by summing percent
+    data = data.groupby(
+        ['FID', 'IID', 'breed'],
+    )['percent'].sum().reset_index()
+
+    # map RedCap population index:
+    result = data.merge(populations, how='inner', on='breed')
+
+    # round percents:
+    result['percent'] = result['percent'].round(decimals=4)
+
+    # drop refs
+    return result[result['FID']=="0"]
+
+
+def save_recap_results(redcap_data, basename):
+    redcap_data.sort_values(by='percent')\
+        .to_csv(
+            f"{basename}GlobalAncestry.csv",
+            index=False,
+            columns=['IID', 'id', 'breed', 'percent'],
+        )
+    redcap_data[['IID', 'id', 'percent']]\
+        .rename(columns = {'id': 'breed'})\
+        .to_json(
+            f"{basename}GlobalAncestry.json",
+            orient='records',
+        )
+
+
+if __name__ == "__main__":
+    args = parse()
+
+    admixture_data = read_data(args)
+
+    save_full_results(admixture_data, args.basename)
+
+    redcap_data = map_to_redcap(admixture_data, args.pops)
+
+    save_recap_results(redcap_data, args.basename)
