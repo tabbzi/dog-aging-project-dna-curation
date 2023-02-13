@@ -193,6 +193,9 @@ if __name__ == "__main__":
     get_sample_updates(kit, sample, samples)
     with open('sample.tsv', 'w') as outfile:
         outfile.write(samples.getvalue())
+        
+    # get new sample table
+    platform, sample = get_entities(args)
 
     # update platform table
     platform_updates = StringIO()  # in memory file
