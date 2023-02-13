@@ -102,12 +102,12 @@ def get_sample_updates(kit, sample, output):
             )
 
 
-def get_platform_updates(status, platform, samples, output):
+def get_platform_updates(status, platform, sample, output):
     # get status rows not found in platform
     result = status[~status['entity:platform_id'].isin(platform['entity:platform_id'])]
     # join with kit table, subset
     result = result.merge(
-        samples[['entity:sample_id', 'participant']],
+        sample[['entity:sample_id', 'participant']],
         left_on='client',
         right_on='entity:sample_id',
     ).drop(
@@ -196,7 +196,7 @@ if __name__ == "__main__":
 
     # update platform table
     platform_updates = StringIO()  # in memory file
-    get_platform_updates(status, platform, samples, platform_updates)
+    get_platform_updates(status, platform, sample, platform_updates)
     with open('platform.tsv', 'w') as outfile:
         outfile.write(platform_updates.getvalue())
 
